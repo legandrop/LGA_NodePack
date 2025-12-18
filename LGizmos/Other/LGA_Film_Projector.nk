@@ -1,0 +1,82 @@
+Group {
+name LGA_Film_Projector2
+selected true
+xpos 1804
+ypos 554
+addUserKnob {20 User}
+addUserKnob {7 start_frame l "Start Frame" R 1 200000}
+start_frame 1001
+addUserKnob {7 speed l "Speed (frames/gate)"}
+speed 0.45
+addUserKnob {7 frame_height l "Frame Height (px)" R 1 10000}
+frame_height 480
+addUserKnob {7 motion_blur l "Motion Blur" R 0 1}
+motion_blur 0.06
+addUserKnob {7 shutter l Shutter R 0 1}
+shutter 0.08
+addUserKnob {7 hold_max l "Hold Max Frame" R 1 200000}
+hold_max 1044
+}
+Input {
+inputs 0
+name Input1
+xpos 433
+ypos 273
+}
+Dot {
+name Dot1
+xpos 467
+ypos 333
+}
+set Nd8b0f800 [stack 0]
+Dot {
+name Dot2
+xpos 291
+ypos 333
+}
+FrameHold {
+firstFrame {{"min(parent.start_frame + floor((frame - parent.start_frame)*parent.speed), parent.hold_max)" l -0 1}}
+name HoldB
+xpos 257
+ypos 406
+}
+Transform {
+translate {0 {"(1 - ((frame - parent.start_frame)*parent.speed - floor((frame - parent.start_frame)*parent.speed)))*parent.frame_height" -0 -0 -0 l -0}}
+motionblur {{"parent.motion_blur" l -0}}
+shutter {{"parent.shutter" l -0}}
+name SlideB
+xpos 257
+ypos 470
+}
+Dot {
+name Dot3
+xpos 291
+ypos 531
+}
+push $Nd8b0f800
+FrameHold {
+firstFrame {{"min(parent.start_frame + floor((frame - parent.start_frame)*parent.speed) + 1, parent.hold_max + 1)" l -0}}
+name HoldA
+xpos 433
+ypos 409
+}
+Transform {
+translate {0 {"-((frame - parent.start_frame)*parent.speed - floor((frame - parent.start_frame)*parent.speed))*parent.frame_height" -0 -0 l -0}}
+motionblur {{"parent.motion_blur" l -0}}
+shutter {{"parent.shutter" l -0}}
+name SlideA
+xpos 433
+ypos 471
+}
+Merge2 {
+inputs 2
+name Merge5
+xpos 433
+ypos 528
+}
+Output {
+name Output1
+xpos 433
+ypos 595
+}
+end_group

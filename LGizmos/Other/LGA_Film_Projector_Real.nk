@@ -1,0 +1,173 @@
+set cut_paste_input [stack 0]
+version 15.1 v6
+push $cut_paste_input
+Group {
+name LGA_Film_Projector_Real5
+selected true
+xpos 1720
+ypos 1186
+addUserKnob {20 User}
+addUserKnob {7 start_frame l "Start Frame" R 1 200000}
+start_frame 1001
+addUserKnob {7 speed l "Speed (frames/gate)"}
+speed 0.2
+addUserKnob {7 frame_height l "Frame Height (px)" R 1 10000}
+frame_height 480
+addUserKnob {7 motion_blur l "Motion Blur"}
+motion_blur 0.06
+addUserKnob {7 shutter l Shutter}
+shutter 0.08
+}
+Constant {
+inputs 0
+channels {rgba.red rgba.green rgba.blue -rgba.alpha}
+name ShutterCard
+xpos 335
+ypos 543
+}
+Reformat {
+type "to box"
+box_height 480
+resize height
+name Reformat1
+xpos 335
+ypos 639
+}
+Transform {
+translate {0 {-NoOp1.shutter_y -0 -0 l -0}}
+center {{"\[value" 1 2} {"\[value" 1 2}}
+motionblur {{parent.motion_blur l -0}}
+shutter {{parent.shutter l -0}}
+name ShutterMove
+xpos 335
+ypos 698
+}
+set N62ecfc00 [stack 0]
+Transform {
+scale {1 3.5}
+center {426.5 240}
+shutteroffset centred
+name Transform1
+xpos 335
+ypos 722
+}
+set N12d13000 [stack 0]
+Blur {
+channels rgba
+size {7 300}
+name Blur1
+label "\[value size]"
+xpos 335
+ypos 743
+}
+Dot {
+name Dot4
+xpos 369
+ypos 795
+}
+push $N62ecfc00
+Input {
+inputs 0
+name Input1
+xpos 550
+ypos 280
+}
+Dot {
+name Dot1
+xpos 584
+ypos 352
+}
+set N3cff400 [stack 0]
+FrameHold {
+firstFrame {{"parent.start_frame + floor((frame - parent.start_frame)*parent.speed) + 1" l -0}}
+name HoldB
+xpos 550
+ypos 407
+}
+push $N3cff400
+Dot {
+name Dot2
+xpos 378
+ypos 352
+}
+FrameHold {
+firstFrame {{"parent.start_frame + floor((frame - parent.start_frame)*parent.speed)" l -0}}
+name HoldA
+xpos 344
+ypos 402
+}
+Dot {
+name Dot3
+xpos 378
+ypos 480
+}
+Switch {
+inputs 2
+which {{"NoOp1.phase >= (2*NoOp1.spacing + NoOp1.down_len + NoOp1.black_len + NoOp1.up_len)"}}
+name FrameSwitch
+xpos 550
+ypos 477
+}
+Merge2 {
+inputs 2
+operation stencil
+bbox B
+mix 0.35
+name MergeShutter
+xpos 550
+ypos 698
+}
+Merge2 {
+inputs 2
+operation stencil
+bbox B
+mix 0.54
+name MergeShutter1
+xpos 550
+ypos 792
+}
+Output {
+name Output1
+xpos 550
+ypos 854
+}
+push $N12d13000
+push 0
+push 0
+Viewer {
+inputs 3
+frame 1028
+frame_range 1001-1127
+input_number 2
+viewerProcess "sRGB (ACES)"
+monitorOutNDISenderName "NukeX - ERSO_000_260_Test_Ojos_comp_v04 - Viewer1"
+name Viewer1
+tile_color 0x323232ff
+xpos 774
+ypos 883
+}
+NoOp {
+inputs 0
+name NoOp1
+xpos 152
+ypos 614
+addUserKnob {20 User}
+addUserKnob {7 cycle}
+cycle {{1/max(parent.speed,0.0001)}}
+addUserKnob {7 spacing}
+spacing {{NoOp1.cycle/3}}
+addUserKnob {7 down_len}
+down_len {{NoOp1.spacing*0.1}}
+addUserKnob {7 black_len}
+black_len {{NoOp1.spacing*0.2}}
+addUserKnob {7 up_len}
+up_len {{NoOp1.spacing*0.1}}
+addUserKnob {7 phase}
+phase {{"((frame-parent.start_frame)+(NoOp1.phase_offset + (NoOp1.down_len + NoOp1.black_len*0.5)))%NoOp1.cycle+NoOp1.cycle" 1}}
+addUserKnob {7 ph}
+ph {{NoOp1.phase%NoOp1.spacing}}
+addUserKnob {7 phase_offset}
+addUserKnob {7 shutter_y}
+shutter_y {{NoOp1.ph<NoOp1.down_len?(-parent.frame_height+(NoOp1.ph/max(NoOp1.down_len,0.0001))*parent.frame_height):(NoOp1.ph<NoOp1.down_len+NoOp1.black_len?0:(NoOp1.ph<NoOp1.down_len+NoOp1.black_len+NoOp1.up_len?((NoOp1.ph-(NoOp1.down_len+NoOp1.black_len))/max(NoOp1.up_len,0.0001))*parent.frame_height:parent.frame_height))}}
+}
+end_group

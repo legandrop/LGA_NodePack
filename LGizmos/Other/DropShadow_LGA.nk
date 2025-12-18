@@ -1,0 +1,180 @@
+Group {
+name DropShadow_LGA
+selected true
+xpos -85
+ypos 71
+addUserKnob {20 dropShadow l User}
+addUserKnob {41 X T Transform1.TX}
+addUserKnob {41 Y T Transform1.TY}
+addUserKnob {41 rotate T Transform1.rotate}
+addUserKnob {7 size R -3 5}
+size 1
+addUserKnob {41 blur T Blur1.size}
+addUserKnob {7 opacity}
+opacity 0.8
+addUserKnob {6 mirror +STARTLINE}
+addUserKnob {6 shadowOnly +STARTLINE}
+addUserKnob {26 ""}
+addUserKnob {41 ShadowColor T NoOp1.color_rgb}
+addUserKnob {41 glow T Glow1.brightness}
+}
+Input {
+inputs 0
+name img
+xpos 30
+ypos -334
+}
+Dot {
+name Dot1
+xpos 64
+ypos -235
+}
+set N23db5400 [stack 0]
+AdjBBox {
+numpixels {{parent.Blur1.size+abs(Transform1.TX)} {parent.Blur1.size+abs(Transform1.TY)}}
+name AdjBBox1
+xpos 30
+ypos 264
+}
+Dot {
+name Dot2
+xpos 64
+ypos 368
+}
+Input {
+inputs 0
+name matte
+xpos 447
+ypos -341
+number 1
+}
+Invert {
+name Invert2
+xpos 447
+ypos -292
+}
+push $N23db5400
+Merge2 {
+inputs 2
+operation stencil
+name Merge1
+xpos 447
+ypos -238
+}
+Shuffle {
+in alpha
+red black
+green black
+blue black
+name Shuffle1
+xpos 447
+ypos -171
+}
+Mirror {
+Vertical {{parent.mirror}}
+name Mirror1
+xpos 447
+ypos -109
+}
+Transform {
+translate {{Transform1.TX} {Transform1.TY}}
+center {810 876}
+filter Rifman
+name Transform1
+selected true
+xpos 447
+ypos -53
+addUserKnob {20 User}
+addUserKnob {7 TX R -200 200}
+TX 4
+addUserKnob {7 TY R -200 200}
+TY 2
+}
+Dilate {
+size {{parent.size-1 i}}
+name Dilate1
+xpos 447
+ypos -2
+}
+Multiply {
+value {{parent.opacity}}
+name Multiply1
+xpos 447
+ypos 44
+}
+Invert {
+name Invert1
+xpos 447
+ypos 106
+}
+Blur {
+size 20
+name Blur1
+xpos 447
+ypos 164
+}
+Dot {
+name Dot3
+xpos 481
+ypos 238
+}
+Constant {
+inputs 0
+color {{parent.NoOp1.color_rgb.r} {parent.NoOp1.color_rgb.g} {parent.NoOp1.color_rgb.b} 1}
+name Constant2
+xpos 585
+ypos 89
+}
+set N26f0a800 [stack 0]
+Merge2 {
+inputs 2
+operation stencil
+bbox A
+name In
+xpos 585
+ypos 235
+}
+Glow {
+channels rgba
+brightness 0
+name Glow1
+xpos 585
+ypos 290
+}
+Merge2 {
+inputs 2
+bbox A
+name Merge2
+xpos 585
+ypos 365
+disable {{parent.shadowOnly}}
+}
+set Nacdb9800 [stack 0]
+push 0
+push $Nacdb9800
+Output {
+name Output1
+xpos 585
+ypos 471
+}
+Viewer {
+inputs 3
+frame_range 1001-1149
+input_number 1
+input_process false
+monitorOutNDISenderName "NukeX - untitled - Viewer1"
+name Viewer1
+xpos 672
+ypos 510
+}
+push $N26f0a800
+NoOp {
+name NoOp1
+xpos 736
+ypos 113
+addUserKnob {20 User}
+addUserKnob {18 color_rgb}
+color_rgb {0 0 0}
+addUserKnob {6 color_rgb_panelDropped l "panel dropped state" +HIDDEN +STARTLINE}
+}
+end_group
