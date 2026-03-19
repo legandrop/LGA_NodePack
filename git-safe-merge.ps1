@@ -4,7 +4,7 @@
 # Designed to be copied to %TEMP% and run from there (survives git checkout).
 
 param(
-    [string]$TargetBranch = "master",
+    [string]$TargetBranch = "main",
     [string]$WorkingDir = ""
 )
 
