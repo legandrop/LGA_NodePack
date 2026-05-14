@@ -3,8 +3,6 @@ Group {
  onCreate "n = nuke.thisNode()\nif n.knob('create').value() == False:\n    format = n.format()\n    center = \[format.width() / 2, format.height() / 2]\n    try:\n        n.knob('pivot_translate').setValue(\[0,0,0])\n    except:\n        pass\n    n.knob('create').setValue(1)"
  knobChanged "n = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name() == \"smart\":\n    s = n.knob('smart').getValue()\n    if s == 0: \n        groupNode = nuke.thisNode()\n        with groupNode:\n            m = nuke.toNode('mask')\n            s = nuke.toNode('STMap')\n            s.setInput(2, m)\n    else:\n        groupNode = nuke.thisNode()\n        with groupNode:\n            m = nuke.toNode('no_filter')\n            s = nuke.toNode('STMap')\n            s.setInput(2, m)"
  tile_color 0xa57aaaff
- note_font "Verdana Bold"
- note_font_color 0xffffffff
  selected true
  addUserKnob {20 iCard3D}
  addUserKnob {41 channels T STMap.channels}
