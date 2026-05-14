@@ -21,12 +21,10 @@ Group {
  addUserKnob {26 ""}
  addUserKnob {41 lens_in_focal l "focal length" T inCard3D2.lens_in_focal}
  addUserKnob {41 lens_in_haperture l "haperture" T inCard3D2.lens_in_haperture}
- addUserKnob {41 z l "card z" T inCard3D2.z}
  addUserKnob {26 ""}
  addUserKnob {4 filterN l filter M {impulse cubic keys Simon Rifman Mitchell Parzen Notch Lanczos4 Lanczos6 sinc4 "" "" "" ""}}
  filterN cubic
  addUserKnob {26 text_5_1 l "" -STARTLINE T "  "}
- addUserKnob {41 mb_samples l "mb samples" T inCard3D2.mb_samples}
  addUserKnob {41 shutter T inCard3D2.shutter}
  addUserKnob {26 ""}
  addUserKnob {6 cropformat l "crop to format" +STARTLINE}
@@ -140,9 +138,7 @@ push $Ncbceb00
   pivot_rotate {{parent.inCard3D2.pivot_rotate.x} {parent.inCard3D2.pivot_rotate.y} {parent.inCard3D2.pivot_rotate.z}}
   lens_in_focal {{parent.inCard3D2.lens_in_focal}}
   lens_in_haperture {{parent.inCard3D2.lens_in_haperture}}
-  z {{parent.inCard3D2.z}}
   filter {{parent.filterN}}
-  mb_samples {{parent.inCard3D2.mb_samples}}
   shutter {{parent.inCard3D2.shutter}}
   name inCard3D1
   xpos 599
