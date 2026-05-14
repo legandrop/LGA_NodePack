@@ -1,0 +1,37 @@
+set cut_paste_input [stack 0]
+version 14.0 v2
+push $cut_paste_input
+Camera2 {
+ translate {{"\[value Cam].translate(reframe)"} {"\[value Cam].translate(reframe)"} {"\[value Cam].translate(reframe)"}}
+ rotate {{"\[value Cam].rotate(reframe)"} {"\[value Cam].rotate(reframe)"} {"\[value Cam].rotate(reframe)"}}
+ scaling {{"\[value Cam].scaling(reframe)"} {"\[value Cam].scaling(reframe)"} {"\[value Cam].scaling(reframe)"}}
+ uniform_scale {{"\[value Cam].uniform_scale(reframe)"}}
+ skew {{"\[value Cam].skew(reframe)"} {"\[value Cam].skew(reframe)"} {"\[value Cam].skew(reframe)"}}
+ pivot_translate {{"\[value Cam].pivot(reframe)"} {"\[value Cam].pivot(reframe)"} {"\[value Cam].pivot(reframe)"}}
+ focal {{"\[value Cam].focal(reframe)"}}
+ haperture {{"\[value Cam].haperture(reframe)"}}
+ vaperture {{"\[value Cam].vaperture(reframe)"}}
+ near {{"\[value Cam].near(reframe)"}}
+ far {{"\[value Cam].far(reframe)"}}
+ win_translate {{"\[value Cam].win_translate(reframe)"} {"\[value Cam].win_translate(reframe)"}}
+ win_scale {{"\[value Cam].win_scale(reframe)"} {"\[value Cam].win_scale(reframe)"}}
+ winroll {{"\[value Cam].winroll(reframe)"}}
+ focal_point {{"\[value Cam].focal_point(reframe)"}}
+ fstop {{"\[value Cam].fstop(reframe)"}}
+ name Camera_retime
+ tile_color 0xb0a45dff
+ label MM
+ note_font "Verdana Bold"
+ selected true
+ xpos -123
+ ypos -272
+ addUserKnob {20 Sources l Camera_retime}
+ addUserKnob {26 CameraHelp l "" +STARTLINE T "Copy/paste name of camera node you want to retime"}
+ addUserKnob {26 ""}
+ addUserKnob {1 Cam l "Camera source" t "Name of the camera node you want to retime"}
+ Cam Camera1
+ addUserKnob {26 divline l "" +STARTLINE}
+ addUserKnob {7 reframe l "retime curve (timing frame)" t "copy or link timewarp frames here" R 0 3000}
+ reframe {{Kronos1.timingFrame2}}
+ addUserKnob {26 Camera_retime_tool_v01 l "" t "Created by Mohamed Mamdouh" +STARTLINE T "\nlink or copy animation from Timewarp/kronos/Oflow input frame\n\nTip:\nUse single frame value instead of animation curve to create static frame projection camera\n(alternative to camera with frame hold).\n\n\n\n\n"}
+}

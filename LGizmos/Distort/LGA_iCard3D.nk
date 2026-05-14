@@ -1,0 +1,220 @@
+Group {
+ name LGA_iCard3D
+ onCreate "n = nuke.thisNode()\nif n.knob('create').value() == False:\n    format = n.format()\n    center = \[format.width() / 2, format.height() / 2]\n    try:\n        n.knob('pivot_translate').setValue(\[0,0,0])\n    except:\n        pass\n    n.knob('create').setValue(1)"
+ knobChanged "n = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name() == \"smart\":\n    s = n.knob('smart').getValue()\n    if s == 0: \n        groupNode = nuke.thisNode()\n        with groupNode:\n            m = nuke.toNode('mask')\n            s = nuke.toNode('STMap')\n            s.setInput(2, m)\n    else:\n        groupNode = nuke.thisNode()\n        with groupNode:\n            m = nuke.toNode('no_filter')\n            s = nuke.toNode('STMap')\n            s.setInput(2, m)"
+ tile_color 0xa57aaaff
+ note_font "Verdana Bold"
+ note_font_color 0xffffffff
+ selected true
+ addUserKnob {20 iCard3D}
+ addUserKnob {41 channels T STMap.channels}
+ addUserKnob {26 ""}
+ addUserKnob {6 blackoutsideBefore l "black outside before" +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {41 translate T inCard3D2.translate}
+ addUserKnob {41 rotate T inCard3D2.rotate}
+ addUserKnob {41 scaling T inCard3D2.scaling}
+ addUserKnob {41 uniform_scale T inCard3D2.uniform_scale}
+ addUserKnob {41 skew T inCard3D2.skew}
+ addUserKnob {41 pivot_translate l "pivot translate" T inCard3D2.pivot_translate}
+ addUserKnob {41 pivot_rotate l "pivot rotate" T inCard3D2.pivot_rotate}
+ addUserKnob {26 ""}
+ addUserKnob {41 lens_in_focal l "focal length" T inCard3D2.lens_in_focal}
+ addUserKnob {41 lens_in_haperture l "haperture" T inCard3D2.lens_in_haperture}
+ addUserKnob {41 z l "card z" T inCard3D2.z}
+ addUserKnob {26 ""}
+ addUserKnob {4 filterN l filter M {impulse cubic keys Simon Rifman Mitchell Parzen Notch Lanczos4 Lanczos6 sinc4 "" "" "" ""}}
+ filterN cubic
+ addUserKnob {26 text_5_1 l "" -STARTLINE T "  "}
+ addUserKnob {41 mb_samples l "mb samples" T inCard3D2.mb_samples}
+ addUserKnob {41 shutter T inCard3D2.shutter}
+ addUserKnob {26 ""}
+ addUserKnob {6 cropformat l "crop to format" +STARTLINE}
+ addUserKnob {26 text_5_2 l "" -STARTLINE T "     "}
+ addUserKnob {6 blackoutsideafter l "black outside after" -STARTLINE}
+ addUserKnob {14 addpixels R 0 100}
+ addUserKnob {7 mix}
+ mix 1
+ addUserKnob {26 text_5 l "" -STARTLINE T "    "}
+ addUserKnob {6 smart l "smart mask  " -STARTLINE}
+ smart true
+ addUserKnob {26 ""}
+ addUserKnob {6 create +INVISIBLE +STARTLINE}
+ create true
+ addUserKnob {26 about_1 l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>LGA_iCard3D v1.0</b> - based on iTransform v2.0 by Aitor Echeveste</span>"}
+ addUserKnob {20 About}
+ addUserKnob {26 text_1 l "" +STARTLINE T "   "}
+ addUserKnob {26 text_4 l "" +STARTLINE T "<font color=#ffffff><font size=\"7\">LGA_iCard3D </font><font size=\"6\"> v1.0</font>\n"}
+ addUserKnob {26 about_1_1 l "" +STARTLINE T "Card3D masked variant — based on iTransform_ae by Aitor Echeveste Izquierdo"}
+ addUserKnob {26 text_1_1 l "" +STARTLINE T "   "}
+ addUserKnob {26 ""}
+ addUserKnob {26 text_3 l "" +STARTLINE T "Apply a Card3D transform only inside a mask region.\nA blurred mask creates a smooth falloff between transformed and original pixels via STMap remap."}
+}
+ Input {
+  inputs 0
+  name crtlMask
+  xpos 606
+  ypos 531
+  number 1
+ }
+set Na054ab00 [stack 0]
+ NoOp {
+  name mattebbox
+  xpos 606
+  ypos 555
+  addUserKnob {20 User}
+  addUserKnob {15 bbox}
+  bbox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+ }
+ Expression {
+  temp_name0 alpha_an
+  temp_expr0 a!=0?1:0
+  expr0 alpha_an
+  expr1 alpha_an
+  expr2 alpha_an
+  expr3 alpha_an
+  name no_filter
+  xpos 606
+  ypos 579
+ }
+ Dot {
+  name Dot1
+  xpos 640
+  ypos 727
+ }
+ Input {
+  inputs 0
+  name mask
+  xpos 221
+  ypos 507
+  number 2
+ }
+ Expression {
+  expr3 (1-a)
+  name invert
+  xpos 221
+  ypos 531
+ }
+ Input {
+  inputs 0
+  name img
+  xpos 121
+  ypos 344
+ }
+ BlackOutside {
+  name BlackOutsideBefore
+  xpos 121
+  ypos 370
+  disable {{!blackoutsideBefore}}
+ }
+set Ncbcf900 [stack 0]
+ Crop {
+  box {{-input.format.width} {-input.format.height} {(input.format.width*2)} {(input.format.height*2)}}
+  crop false
+  name Crop1
+  xpos 474
+  ypos 370
+ }
+ Expression {
+  expr0 (x+0.5)/width
+  expr1 (y+.5)/height
+  name Expression1
+  xpos 474
+  ypos 418
+ }
+set Ncbceb00 [stack 0]
+ Dot {
+  name Dot2
+  xpos 343
+  ypos 421
+ }
+push $Na054ab00
+push $Ncbceb00
+ Card3D {
+  translate {{parent.inCard3D2.translate.x} {parent.inCard3D2.translate.y} {parent.inCard3D2.translate.z}}
+  rotate {{parent.inCard3D2.rotate.x} {parent.inCard3D2.rotate.y} {parent.inCard3D2.rotate.z}}
+  scaling {{parent.inCard3D2.scaling.x} {parent.inCard3D2.scaling.y} {parent.inCard3D2.scaling.z}}
+  uniform_scale {{parent.inCard3D2.uniform_scale}}
+  skew {{parent.inCard3D2.skew.x} {parent.inCard3D2.skew.y} {parent.inCard3D2.skew.z}}
+  pivot_translate {{parent.inCard3D2.pivot_translate.x} {parent.inCard3D2.pivot_translate.y} {parent.inCard3D2.pivot_translate.z}}
+  pivot_rotate {{parent.inCard3D2.pivot_rotate.x} {parent.inCard3D2.pivot_rotate.y} {parent.inCard3D2.pivot_rotate.z}}
+  lens_in_focal {{parent.inCard3D2.lens_in_focal}}
+  lens_in_haperture {{parent.inCard3D2.lens_in_haperture}}
+  z {{parent.inCard3D2.z}}
+  filter {{parent.filterN}}
+  mb_samples {{parent.inCard3D2.mb_samples}}
+  shutter {{parent.inCard3D2.shutter}}
+  name inCard3D1
+  xpos 599
+  ypos 418
+ }
+push $Ncbceb00
+ Keymix {
+  inputs 3
+  name Keymix1
+  xpos 474
+  ypos 525
+ }
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 309
+  ypos 525
+  disable {{"\[exists parent.input2]==1?smart==1?0:1:1" x1 0 x1001 1}}
+ }
+ Expression {
+  expr0 ((x+0.5)/width)
+  expr1 ((y+0.5)/height)
+  mix {{1-parent.mix}}
+  name mix
+  xpos 309
+  ypos 563
+ }
+push $Ncbcf900
+ NoOp {
+  name inputbbox
+  xpos 126
+  ypos 723
+  addUserKnob {20 User}
+  addUserKnob {15 bbox}
+  bbox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+ }
+ STMap {
+  inputs 2+1
+  channels rgba
+  uv rgb
+  name STMap
+  xpos 309
+  ypos 723
+ }
+ Crop {
+  box {{"inputbbox.bbox<mattebbox.bbox?\n\ninputbbox.bbox-addpixels\n\n:inputbbox.bbox+(mattebbox.bbox- inputbbox.bbox)-addpixels\n\n"} {"inputbbox.bbox<mattebbox.bbox?\n\ninputbbox.bbox-addpixels\n\n:inputbbox.bbox+(mattebbox.bbox- inputbbox.bbox)-addpixels"} {"inputbbox.bbox>mattebbox.bbox?\n\ninputbbox.bbox+addpixels\n\n:inputbbox.bbox+(mattebbox.bbox- inputbbox.bbox)+addpixels"} {"inputbbox.bbox>mattebbox.bbox?\n\ninputbbox.bbox+addpixels\n:inputbbox.bbox+(mattebbox.bbox- inputbbox.bbox)+addpixels"}}
+  name Crop3
+  xpos 309
+  ypos 747
+ }
+ Reformat {
+  name Reformat2
+  xpos 309
+  ypos 771
+  disable {{!cropformat}}
+ }
+ BlackOutside {
+  name BlackOutsideAfter
+  xpos 309
+  ypos 797
+  disable {{!blackoutsideafter}}
+ }
+ Output {
+  name Output1
+  xpos 309
+  ypos 823
+ }
+ Card3D {
+  inputs 0
+  filter {{parent.filterN}}
+  name inCard3D2
+  xpos 715
+  ypos 417
+ }
+end_group
