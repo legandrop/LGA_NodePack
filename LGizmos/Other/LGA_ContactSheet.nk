@@ -14,9 +14,10 @@ Group {
  addUserKnob {6 vertical_two_inputs l "Vertical Layout for 2 Inputs" +STARTLINE}
  addUserKnob {18 text_color l "Text Color"}
  text_color {0 1 0}
- addUserKnob {7 text_font_size l "Text Font Size" R 1 500}
- text_font_size 154
- addUserKnob {12 text_offset l "Text Offset"}
+ addUserKnob {7 text_font_size l "Text Scale" R 0.05 5}
+ text_font_size 0.505
+ addUserKnob {7 text_offset_x l "Text Offset X" R -5000 5000}
+ addUserKnob {7 text_offset_y l "Text Offset Y" R -5000 5000}
 }
  Input {
   inputs 0
@@ -28,9 +29,9 @@ Group {
  }
  Text2 {
   message "\[file tail \[value \[topnode parent.input0].file]]\n"
-  box {{131.0625+parent.text_offset.x} {85.6875+parent.text_offset.y} {1820.9375+parent.text_offset.x} {158.3125+parent.text_offset.y}}
-  global_font_scale 0.505
-  font_size {{parent.text_font_size}}
+  box {{131.0625+parent.text_offset_x} {85.6875+parent.text_offset_y} {1820.9375+parent.text_offset_x} {158.3125+parent.text_offset_y}}
+  global_font_scale {{parent.text_font_size}}
+  font_size 154
   autofit_bbox false
   color {{parent.text_color.r} {parent.text_color.g} {parent.text_color.b} 0}
   disable {{1-parent.filename_burnin}}

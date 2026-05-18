@@ -90,10 +90,11 @@ El mensaje usa `parent topnode`: `[file tail [value [topnode parent.inputN].file
 `topnode` a secas se queda en el nodo `Input` interno del grupo; con
 `parent.inputN`, arranca desde el input externo del grupo.
 
-El color, el tamano y la posicion del texto se controlan desde knobs del grupo.
-`Text Offset` es relativo al box original del burn-in: `0, 0` mantiene la
-posicion actual; valores positivos mueven el texto hacia la derecha y abajo.
-El `global_font_scale` queda fijo en `0.505`, como el script original.
+El color, la escala y la posicion del texto se controlan desde knobs del grupo.
+`Text Scale` maneja `global_font_scale`; el default `0.505` mantiene el tamano
+original. `Text Offset X/Y` es relativo al box original del burn-in: `0, 0`
+mantiene la posicion actual; valores positivos mueven el texto hacia la
+derecha y abajo.
 
 ## Tab Settings
 
@@ -104,9 +105,10 @@ Identico al de ContactSheetAuto mas el knob nuevo:
 - `Vertical Layout for 2 Inputs` (`vertical_two_inputs`) - con dos inputs,
   los apila verticalmente en vez de ponerlos lado a lado.
 - `Text Color` (`text_color`) - color del burn-in.
-- `Text Font Size` (`text_font_size`) - tamano de fuente del burn-in.
-- `Text Offset` (`text_offset`) - desplazamiento X/Y relativo a la posicion
-  original del texto.
+- `Text Scale` (`text_font_size`) - escala visual del texto via
+  `global_font_scale`.
+- `Text Offset X` (`text_offset_x`) - desplazamiento horizontal relativo.
+- `Text Offset Y` (`text_offset_y`) - desplazamiento vertical relativo.
 
 ## Limitaciones conocidas
 

@@ -34,14 +34,14 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="691"/>
             <splitter orientation="2">
                 <split size="1319"/>
-                <dock id="" activePageId="Properties.1">
+                <dock id="" activePageId="Properties.1" focus="true">
                     <page id="Properties.1"/>
                     <page id="com.adrianpueyo.KnobScripterPane"/>
                     <page id="uk.co.thefoundry.scripteditor.1"/>
                 </dock>
             </splitter>
             <split size="1380"/>
-            <dock id="" activePageId="Viewer.1" focus="true">
+            <dock id="" activePageId="Viewer.1">
                 <page id="Viewer.2"/>
                 <page id="Viewer.1"/>
             </dock>
@@ -189,6 +189,24 @@ ypos 59
 }
 Read {
 inputs 0
+file_type exr
+file T:/VFX-MOR/101/MOR_1020_040/Comp/4_publish/MOR_1020_040_comp_v015/MOR_1020_040_comp_v015_%04d.exr
+format "3840 1612 0 0 3840 1612 1 3840x1612"
+first 1001
+last 1143
+origfirst 1001
+origlast 1143
+origset true
+version 1
+colorspace "ACES - ACES2065-1"
+auto_alpha true
+name Read8
+tile_color 0x7f4b69ff
+xpos 1573
+ypos 75
+}
+Read {
+inputs 0
 file_type mov
 file T:/VFX-TEST/001-021/TEST_014_020/_input/tEST_2_SEGUNDOS.mov
 format "4096 2160 0 0 4096 2160 1 4K_DCP"
@@ -221,24 +239,6 @@ render_time 00:18:27
 Read {
 inputs 0
 file_type exr
-file T:/VFX-MOR/101/MOR_1020_040/Comp/4_publish/MOR_1020_040_comp_v015/MOR_1020_040_comp_v015_%04d.exr
-format "3840 1612 0 0 3840 1612 1 3840x1612"
-first 1001
-last 1143
-origfirst 1001
-origlast 1143
-origset true
-version 1
-colorspace "ACES - ACES2065-1"
-auto_alpha true
-name Read8
-tile_color 0x7f4b69ff
-xpos 1573
-ypos 75
-}
-Read {
-inputs 0
-file_type exr
 file T:/VFX-MOR/101/MOR_1012C_010/_input/MOR_1012C_010_bPlate_v01/MOR_1012C_010_bPlate_v01_%04d.exr
 localizationPolicy off
 format "4168 1612 0 0 4168 1612 1 MOR_unsqueeze"
@@ -254,13 +254,12 @@ ypos 62
 }
 set Ncfc51000 [stack 0]
 Group {
-inputs 2
 name LGA_ContactSheet
 onCreate "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.on_create()"
 knobChanged "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.knob_changed()"
 selected true
-xpos 1467
-ypos 403
+xpos 1535
+ypos 392
 addUserKnob {20 Settings}
 addUserKnob {7 resMult l "Resolution Multiplier" R 0.1 2}
 resMult 1
@@ -269,42 +268,14 @@ filename_burnin true
 addUserKnob {6 vertical_two_inputs l "Vertical Layout for 2 Inputs" +STARTLINE}
 vertical_two_inputs true
 addUserKnob {18 text_color l "Text Color"}
-text_color {0.9570000172 1 0.9570000172}
+text_color {0 1 0}
 addUserKnob {6 text_color_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
-addUserKnob {7 text_font_size l "Text Font Size" R 1 500}
-text_font_size 250
-addUserKnob {12 text_offset l "Text Offset"}
-}
-Input {
-inputs 0
-name Input2
-label 2
-xpos 160
-number 1
-}
-Text2 {
-font_size_toolbar 100
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[value \[topnode parent.input1].file]]\n"
-old_message {{77 79 82 95 49 48 50 48 95 48 52 48 95 99 111 109 112 95 118 48 49 53 95 48 53 54 52 46 101 120 114 10}
-  }
-old_expression_markers {{0 30}
-  }
-box {{"131.0625 + parent.text_offset.x"} {"85.6875 + parent.text_offset.y"} {"1820.9375 + parent.text_offset.x"} {"158.3125 + parent.text_offset.y"}}
-transforms {{0 2}
-  }
-global_font_scale 0.505
-font_size {{parent.text_font_size}}
-autofit_bbox false
-group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
-animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
-  }
-color {{parent.text_color.r} {parent.text_color.g} {parent.text_color.b} 0}
-name Burnin_1
-xpos 160
-ypos 130
-disable {{1-parent.filename_burnin}}
+text_color_panelDropped true
+addUserKnob {7 text_font_size l "Text Scale" R 0.05 5}
+text_font_size 0.92
+addUserKnob {7 text_offset_x l "Text Offset X" R -5000 5000}
+addUserKnob {7 text_offset_y l "Text Offset Y" R -5000 5000}
+text_offset_y 50
 }
 Input {
 inputs 0
@@ -321,11 +292,11 @@ old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 98 80 108 97 116 101 95 
   }
 old_expression_markers {{0 32}
   }
-box {{"131.0625 + parent.text_offset.x"} {"85.6875 + parent.text_offset.y"} {"1820.9375 + parent.text_offset.x"} {"158.3125 + parent.text_offset.y"}}
+box {{"131.0625 + parent.text_offset_x"} {"85.6875 + parent.text_offset_y"} {"1820.9375 + parent.text_offset_x"} {"158.3125 + parent.text_offset_y"}}
 transforms {{0 2}
   }
-global_font_scale 0.505
-font_size {{parent.text_font_size}}
+global_font_scale {{parent.text_font_size}}
+font_size 154
 autofit_bbox false
 group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
 animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
@@ -337,7 +308,6 @@ ypos 130
 disable {{1-parent.filename_burnin}}
 }
 ContactSheet {
-inputs 2
 width {{input.width*columns*parent.resMult}}
 height {{input.height*rows*parent.resMult}}
 rows {{"\[value parent.vertical_two_inputs] && \[numvalue inputs] == 2 ? 2 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] * \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] ) ) )) )\} ] < \[numvalue inputs]   ? \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] +1 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ]"}}
@@ -355,28 +325,28 @@ ypos 360
 }
 Input {
 inputs 0
-name Input3
-label 3
-xpos 320
-number 2
+name Input2
+label 2
+xpos 160
+number 1
 }
 Text2 {
 font_size_toolbar 100
 font_width_toolbar 100
 font_height_toolbar 100
-message "\[file tail \[value \[topnode parent.input2].file]]\n"
-box {{"131.0625 + parent.text_offset.x"} {"85.6875 + parent.text_offset.y"} {"1820.9375 + parent.text_offset.x"} {"158.3125 + parent.text_offset.y"}}
+message "\[file tail \[value \[topnode parent.input1].file]]\n"
+box {{"131.0625 + parent.text_offset_x"} {"85.6875 + parent.text_offset_y"} {"1820.9375 + parent.text_offset_x"} {"158.3125 + parent.text_offset_y"}}
 transforms {{0 2}
   }
-global_font_scale 0.505
-font_size {{parent.text_font_size}}
+global_font_scale {{parent.text_font_size}}
+font_size 154
 autofit_bbox false
 group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
 animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
   }
 color {{parent.text_color.r} {parent.text_color.r} {parent.text_color.r} {parent.text_color.r x564 0}}
-name Burnin_2
-xpos 320
+name Burnin_1
+xpos 160
 ypos 130
 disable {{1-parent.filename_burnin}}
 }

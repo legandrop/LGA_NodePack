@@ -54,14 +54,20 @@ def _ensure_group_knobs(group):
         knob.setValue([0.0, 1.0, 0.0])
         group.addKnob(knob)
     if "text_font_size" not in group.knobs():
-        knob = nuke.Double_Knob("text_font_size", "Text Font Size")
-        knob.setRange(1, 500)
-        knob.setValue(154)
+        knob = nuke.Double_Knob("text_font_size", "Text Scale")
+        knob.setRange(0.05, 5)
+        knob.setValue(0.505)
         group.addKnob(knob)
-    if "text_offset" not in group.knobs():
-        knob = nuke.XY_Knob("text_offset", "Text Offset")
-        knob.setValue([0.0, 0.0])
+    if "text_offset_x" not in group.knobs():
+        knob = nuke.Double_Knob("text_offset_x", "Text Offset X")
+        knob.setValue(0.0)
         group.addKnob(knob)
+    if "text_offset_y" not in group.knobs():
+        knob = nuke.Double_Knob("text_offset_y", "Text Offset Y")
+        knob.setValue(0.0)
+        group.addKnob(knob)
+    if "text_offset" in group.knobs():
+        group["text_offset"].setFlag(nuke.INVISIBLE)
 
 
 def _sync_contactsheet_layout_knobs(cs):
@@ -80,23 +86,23 @@ def _burnin_message(index):
 def _set_burnin_style(t, index):
     t["message"].setValue(_burnin_message(index))
     t["box"].setExpression(
-        "%s + parent.text_offset.x" % BASE_TEXT_BOX[0],
+        "%s + parent.text_offset_x" % BASE_TEXT_BOX[0],
         0,
     )
     t["box"].setExpression(
-        "%s + parent.text_offset.y" % BASE_TEXT_BOX[1],
+        "%s + parent.text_offset_y" % BASE_TEXT_BOX[1],
         1,
     )
     t["box"].setExpression(
-        "%s + parent.text_offset.x" % BASE_TEXT_BOX[2],
+        "%s + parent.text_offset_x" % BASE_TEXT_BOX[2],
         2,
     )
     t["box"].setExpression(
-        "%s + parent.text_offset.y" % BASE_TEXT_BOX[3],
+        "%s + parent.text_offset_y" % BASE_TEXT_BOX[3],
         3,
     )
-    t["global_font_scale"].setValue(0.505)
-    t["font_size"].setExpression("parent.text_font_size")
+    t["global_font_scale"].setExpression("parent.text_font_size")
+    t["font_size"].setValue(154)
     t["color"].setExpression("parent.text_color.r", 0)
     t["color"].setExpression("parent.text_color.g", 1)
     t["color"].setExpression("parent.text_color.b", 2)
