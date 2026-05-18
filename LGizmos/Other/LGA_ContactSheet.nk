@@ -20,7 +20,6 @@ Group {
  text_font_size 0.505
  addUserKnob {7 text_offset_x l "Text Offset X" R -5000 5000}
  addUserKnob {7 text_offset_y l "Text Offset Y" R -5000 5000}
- addUserKnob {6 debug_text_box l "Debug Text Box" +STARTLINE}
 }
  Input {
   inputs 0
@@ -41,19 +40,6 @@ Group {
   name Burnin_0
   xpos 0
   ypos 130
- }
- Text2 {
-  inputs 1
-  message "res: \[value input.width]x\[value input.height]\nbox: \[value box.x] \[value box.y] \[value box.r] \[value box.t]\ncalc: w*0.068262 h*0.079340 w*0.948405 h*0.146586\n"
-  box {{input.width*0.02} {input.height*0.015} {input.width*0.98} {input.height*0.12}}
-  global_font_scale 0.25
-  font_size 80
-  autofit_bbox false
-  color {1 0 0 0}
-  disable {{1-parent.debug_text_box}}
-  name BurninDebug_0
-  xpos 0
-  ypos 220
  }
  ContactSheet {
   inputs 1

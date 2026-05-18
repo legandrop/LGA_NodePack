@@ -105,9 +105,6 @@ manteniendo las proporciones del box original:
 - right = `input.width * 0.948405`
 - bottom = `input.height * 0.146586`
 
-El checkbox **Debug Text Box** agrega un texto rojo arriba de cada input con la
-resolucion y los valores de box calculados para revisar el comportamiento.
-
 ## Tab Settings
 
 Identico al de ContactSheetAuto mas el knob nuevo:
@@ -121,8 +118,6 @@ Identico al de ContactSheetAuto mas el knob nuevo:
   `global_font_scale`.
 - `Text Offset X` (`text_offset_x`) - desplazamiento horizontal relativo.
 - `Text Offset Y` (`text_offset_y`) - desplazamiento vertical relativo.
-- `Debug Text Box` (`debug_text_box`) - muestra resolucion y calculo del box
-  sobre cada input.
 
 ## Limitaciones conocidas
 

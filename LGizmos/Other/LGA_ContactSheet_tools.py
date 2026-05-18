@@ -75,11 +75,6 @@ def _ensure_group_knobs(group):
         knob = nuke.Double_Knob("text_offset_y", "Text Offset Y")
         knob.setValue(0.0)
         group.addKnob(knob)
-    if "debug_text_box" not in group.knobs():
-        knob = nuke.Boolean_Knob("debug_text_box", "Debug Text Box")
-        knob.setFlag(nuke.STARTLINE)
-        knob.setValue(False)
-        group.addKnob(knob)
     if "text_offset" in group.knobs():
         group["text_offset"].setFlag(nuke.INVISIBLE)
 
@@ -93,24 +88,12 @@ def _burnin_name(index):
     return "Burnin_%d" % index
 
 
-def _debug_name(index):
-    return "BurninDebug_%d" % index
-
-
 def _burnin_message(index):
     return "[file tail [value [topnode parent.input%d].file]]\n" % index
 
 
 def _box_expr(factor, axis, offset_knob):
     return "input.%s * %.6f + parent.%s" % (axis, factor, offset_knob)
-
-
-def _debug_message():
-    return (
-        "res: [value input.width]x[value input.height]\\n"
-        "box: [value box.x] [value box.y] [value box.r] [value box.t]\\n"
-        "calc: w*%.6f h*%.6f w*%.6f h*%.6f\\n"
-    ) % (BOX_LEFT_FACTOR, BOX_TOP_FACTOR, BOX_RIGHT_FACTOR, BOX_BOTTOM_FACTOR)
 
 
 def _set_burnin_style(t, index):
@@ -133,19 +116,6 @@ def _set_burnin_style(t, index):
     t["disable"].setExpression("1-parent.filename_burnin")
 
 
-def _set_debug_style(t):
-    t["message"].setValue(_debug_message())
-    t["box"].setExpression("input.width * 0.02", 0)
-    t["box"].setExpression("input.height * 0.015", 1)
-    t["box"].setExpression("input.width * 0.98", 2)
-    t["box"].setExpression("input.height * 0.12", 3)
-    t["global_font_scale"].setValue(0.25)
-    t["font_size"].setValue(80)
-    t["color"].setValue([1.0, 0.0, 0.0, 0.0])
-    t["autofit_bbox"].setValue(False)
-    t["disable"].setExpression("1-parent.debug_text_box")
-
-
 def _make_burnin(name, index):
     """Crea un Text2 con el mismo estilo que los Text de contactsheet_review.nk."""
     t = nuke.nodes.Text2(name=name)
@@ -163,14 +133,7 @@ def _ensure_burnin(index, inp):
         _set_burnin_style(txt, index)
     txt.setInput(0, inp)
     txt.setXYpos(index * 160, 130)
-    debug_name = _debug_name(index)
-    debug = nuke.toNode(debug_name)
-    if debug is None:
-        debug = nuke.nodes.Text2(name=debug_name)
-    _set_debug_style(debug)
-    debug.setInput(0, txt)
-    debug.setXYpos(index * 160, 220)
-    return debug
+    return txt
 
 
 def _connected_count(group):
@@ -224,10 +187,9 @@ def sync(group):
             # Borrar las ramas sobrantes (inputs que ya no existen).
             for j, inp in list(existing.items()):
                 if j >= desired:
-                    for burn_name in (_burnin_name(j), _debug_name(j)):
-                        burn = nuke.toNode(burn_name)
-                        if burn is not None:
-                            nuke.delete(burn)
+                    burn = nuke.toNode(_burnin_name(j))
+                    if burn is not None:
+                        nuke.delete(burn)
                     nuke.delete(inp)
 
             # Recablear el ContactSheet: solo las ramas conectadas (min 1).
