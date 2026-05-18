@@ -28,7 +28,7 @@ El `.py` queda importable porque `menu.py` hace `pluginAddPath` de la carpeta
 ```
 Input1    Input2    Input3 ...       (se ven como 1, 2, 3 en la UI)
    |         |         |
-Burnin_*  Burnin_*  Burnin_* ...      (cadena de Text2, uno activo por input)
+Burnin_0  Burnin_1  Burnin_2 ...      (Text2, uno por input)
    \________ | ________/
          ContactSheet1
               |
@@ -55,9 +55,9 @@ El grupo tiene dos callbacks que llaman a `LGA_ContactSheet_tools`:
 2. Mantiene adentro `conectados + 1` ramas `Input -> Burnin` (una rama libre
    extra para poder seguir conectando). Crea las que falten, borra las que
    sobren.
-3. Cablea el `ContactSheet` interno al final de la cadena `Burnin` de cada
-   input conectado. Asi el input 1 del grupo va al input 1 del ContactSheet
-   (no se cruzan).
+3. Cablea el `ContactSheet` interno: input `j` del ContactSheet = `Burnin_j`,
+   solo para las ramas conectadas. Asi el input 1 del grupo va al input 1 del
+   ContactSheet (no se cruzan).
 4. Setea primero el knob interno `number` y despues renombra los nodos como
    `Input1`, `Input2`, `Input3`, etc. Esto evita que Nuke regenere nombres
    como `Input_1` al cambiar el numero. Tambien fija el `label` visible como
@@ -76,25 +76,15 @@ inputs]`. Como `sync()` cablea el ContactSheet solo con las ramas conectadas,
 
 ## Burn-in
 
-Cada rama tiene varios `Text2` internos para probar distintas formas de leer
-el nombre del archivo desde adentro del grupo. El knob **Filename Formula**
-elige cual queda activo:
-
-- `parent topnode` - `[file tail [value [topnode parent.inputN].file]]`
-- `direct parent input` - `[file tail [value [input parent N].file ""]]`
-- `metadata input/filename` - `[file tail [metadata input/filename]]`
-- `python parent input` - obtiene `parent().input(N)` por Python y usa
-  `nuke.filename()`.
-
-Cada `Burnin` (Text2) tiene su knob `disable` ligado a `Filename Burn-in` y a
-`Filename Formula`:
+Cada `Burnin` (Text2) tiene su knob `disable` con la expresion
+`1-parent.filename_burnin`:
 
 - Checkbox **OFF** -> `disable = 1` -> el Text pasa la imagen sin tocar.
-- Checkbox **ON** -> queda activo solo el Text de la formula elegida.
+- Checkbox **ON** -> `disable = 0` -> el Text dibuja el nombre de archivo.
 
-La formula por defecto es `parent topnode`, porque `topnode` a secas se queda
-en el nodo `Input` interno del grupo. Con `parent.inputN`, `topnode` arranca
-desde el input externo del grupo. Mismo estilo verde, `font_size` 154,
+El mensaje usa `parent topnode`: `[file tail [value [topnode parent.inputN].file]]`.
+`topnode` a secas se queda en el nodo `Input` interno del grupo; con
+`parent.inputN`, arranca desde el input externo del grupo. Mismo estilo verde, `font_size` 154,
 `global_font_scale` 0.505 y `box` que el script original.
 
 ## Tab Settings
@@ -103,8 +93,6 @@ Identico al de ContactSheetAuto mas el knob nuevo:
 
 - `Resolution Multiplier` (`resMult`) - igual que el original.
 - `Filename Burn-in` (`filename_burnin`) - checkbox nuevo.
-- `Filename Formula` (`filename_formula`) - selector temporal para comparar
-  formulas de burn-in dentro del grupo.
 
 ## Limitaciones conocidas
 
