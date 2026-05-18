@@ -5,8 +5,8 @@ Group {
  selected true
  xpos 0
  ypos 0
- onCreate "import LGA_ContactSheet_tools as m\nm.on_create()"
- knobChanged "import LGA_ContactSheet_tools as m\nm.knob_changed()"
+ onCreate "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.on_create()"
+ knobChanged "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.knob_changed()"
  addUserKnob {20 Settings}
  addUserKnob {7 resMult l "Resolution Multiplier" R 0.1 2}
  resMult 1
@@ -14,7 +14,8 @@ Group {
 }
  Input {
   inputs 0
-  name Input_0
+  name Input1
+  label 1
   number 0
   xpos 0
   ypos 0

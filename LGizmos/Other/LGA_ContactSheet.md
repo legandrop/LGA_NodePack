@@ -26,7 +26,7 @@ El `.py` queda importable porque `menu.py` hace `pluginAddPath` de la carpeta
 ## Estructura interna del grupo
 
 ```
-Input_0   Input_1   Input_2 ...      (1 al crear, crecen dinamicamente)
+Input1    Input2    Input3 ...       (se ven como 1, 2, 3 en la UI)
    |         |         |
 Burnin_0  Burnin_1  Burnin_2 ...      (Text2, uno por input)
    \________ | ________/
@@ -35,7 +35,7 @@ Burnin_0  Burnin_1  Burnin_2 ...      (Text2, uno por input)
            Output1
 ```
 
-El `.nk` se entrega con una sola rama (`Input_0 -> Burnin_0 -> ContactSheet1`).
+El `.nk` se entrega con una sola rama (`Input1 -> Burnin_0 -> ContactSheet1`).
 El resto lo arma el callback.
 
 ## Inputs dinamicos
@@ -58,6 +58,11 @@ El grupo tiene dos callbacks que llaman a `LGA_ContactSheet_tools`:
 3. Cablea el `ContactSheet` interno: input `j` del ContactSheet = `Burnin_j`,
    solo para las ramas conectadas. Asi el input 1 del grupo va al input 1 del
    ContactSheet (no se cruzan).
+4. Setea primero el knob interno `number` y despues renombra los nodos como
+   `Input1`, `Input2`, `Input3`, etc. Esto evita que Nuke regenere nombres
+   como `Input_1` al cambiar el numero. Tambien fija el `label` visible como
+   `1`, `2`, `3`. El orden interno sigue dependiendo de `number`, en base cero
+   (`0`, `1`, `2`, etc.).
 
 Hay una guarda de reentrada (`_busy`) porque agregar o borrar nodos `Input`
 vuelve a disparar `knobChanged`.

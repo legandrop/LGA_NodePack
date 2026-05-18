@@ -19,6 +19,19 @@ BURNIN_MESSAGE = "[file tail [knob [topnode].file]]\n"
 _busy = False
 
 
+def _input_name(index):
+    """Nombre visible del input del grupo; el orden interno sigue usando number."""
+    return "Input%d" % (index + 1)
+
+
+def _set_input_identity(inp, index):
+    """Fija number primero; Nuke puede renombrar el nodo al cambiar ese knob."""
+    inp["number"].setValue(index)
+    inp.setName(_input_name(index))
+    if "label" in inp.knobs():
+        inp["label"].setValue(str(index + 1))
+
+
 def _make_burnin(name):
     """Crea un Text2 con el mismo estilo que los Text de contactsheet_review.nk."""
     t = nuke.nodes.Text2(name=name)
@@ -70,9 +83,10 @@ def sync(group):
             # Crear las ramas Input -> Burnin que falten.
             for j in range(desired):
                 if j in existing:
+                    _set_input_identity(existing[j], j)
                     continue
-                inp = nuke.nodes.Input(name="Input_%d" % j)
-                inp["number"].setValue(j)
+                inp = nuke.nodes.Input()
+                _set_input_identity(inp, j)
                 inp.setXYpos(j * 160, 0)
                 txt = _make_burnin("Burnin_%d" % j)
                 txt.setInput(0, inp)
