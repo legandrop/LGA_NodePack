@@ -44,14 +44,20 @@ def _set_input_identity(inp, index):
         inp["label"].setValue(str(index + 1))
 
 
-def _ensure_group_knobs(group):
-    if "vertical_two_inputs" not in group.knobs():
-        knob = nuke.Boolean_Knob("vertical_two_inputs", "Vertical Layout for 2 Inputs")
+def _ensure_default_bool(group, name, label):
+    if name not in group.knobs():
+        knob = nuke.Boolean_Knob(name, label)
         knob.setFlag(nuke.STARTLINE)
+        knob.setValue(True)
         group.addKnob(knob)
+
+
+def _ensure_group_knobs(group):
+    _ensure_default_bool(group, "filename_burnin", "Filename Burn-in")
+    _ensure_default_bool(group, "vertical_two_inputs", "Vertical Layout for 2 Inputs")
     if "text_color" not in group.knobs():
         knob = nuke.Color_Knob("text_color", "Text Color")
-        knob.setValue([0.0, 1.0, 0.0])
+        knob.setValue([1.0, 1.0, 1.0])
         group.addKnob(knob)
     if "text_font_size" not in group.knobs():
         knob = nuke.Double_Knob("text_font_size", "Text Scale")

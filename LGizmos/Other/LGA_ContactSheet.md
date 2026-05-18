@@ -85,6 +85,7 @@ Cada `Burnin` (Text2) tiene su knob `disable` con la expresion
 
 - Checkbox **OFF** -> `disable = 1` -> el Text pasa la imagen sin tocar.
 - Checkbox **ON** -> `disable = 0` -> el Text dibuja el nombre de archivo.
+  Por defecto viene encendido.
 
 El mensaje usa `parent topnode`: `[file tail [value [topnode parent.inputN].file]]`.
 `topnode` a secas se queda en el nodo `Input` interno del grupo; con
@@ -101,10 +102,10 @@ derecha y abajo.
 Identico al de ContactSheetAuto mas el knob nuevo:
 
 - `Resolution Multiplier` (`resMult`) - igual que el original.
-- `Filename Burn-in` (`filename_burnin`) - checkbox nuevo.
+- `Filename Burn-in` (`filename_burnin`) - checkbox nuevo, encendido por defecto.
 - `Vertical Layout for 2 Inputs` (`vertical_two_inputs`) - con dos inputs,
-  los apila verticalmente en vez de ponerlos lado a lado.
-- `Text Color` (`text_color`) - color del burn-in.
+  los apila verticalmente en vez de ponerlos lado a lado. Encendido por defecto.
+- `Text Color` (`text_color`) - color del burn-in. Blanco por defecto.
 - `Text Scale` (`text_font_size`) - escala visual del texto via
   `global_font_scale`.
 - `Text Offset X` (`text_offset_x`) - desplazamiento horizontal relativo.

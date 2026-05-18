@@ -34,7 +34,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
             <split size="691"/>
             <splitter orientation="2">
                 <split size="1319"/>
-                <dock id="" activePageId="Properties.1" focus="true">
+                <dock id="" activePageId="Properties.1">
                     <page id="Properties.1"/>
                     <page id="com.adrianpueyo.KnobScripterPane"/>
                     <page id="uk.co.thefoundry.scripteditor.1"/>
@@ -257,7 +257,6 @@ Group {
 name LGA_ContactSheet
 onCreate "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.on_create()"
 knobChanged "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.knob_changed()"
-selected true
 xpos 1535
 ypos 392
 addUserKnob {20 Settings}
@@ -268,9 +267,8 @@ filename_burnin true
 addUserKnob {6 vertical_two_inputs l "Vertical Layout for 2 Inputs" +STARTLINE}
 vertical_two_inputs true
 addUserKnob {18 text_color l "Text Color"}
-text_color {0 1 0}
+text_color 1
 addUserKnob {6 text_color_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
-text_color_panelDropped true
 addUserKnob {7 text_font_size l "Text Scale" R 0.05 5}
 text_font_size 0.92
 addUserKnob {7 text_offset_x l "Text Offset X" R -5000 5000}
