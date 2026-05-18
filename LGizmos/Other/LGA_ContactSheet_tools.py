@@ -12,6 +12,19 @@ ________________________________________________________________________________
 import nuke
 import traceback
 
+AUTO_ROWS_EXPR = (
+    '[value parent.vertical_two_inputs] && [numvalue inputs] == 2 ? 2 : '
+    '[expr {int( (sqrt( [numvalue inputs] ) ) )} ] * '
+    '[expr {int( ceil ( ([numvalue inputs] /(sqrt( [numvalue inputs] ) ) )) )} ] '
+    '< [numvalue inputs]   ? [expr {int( (sqrt( [numvalue inputs] ) ) )} ] +1 : '
+    '[expr {int( (sqrt( [numvalue inputs] ) ) )} ]'
+)
+
+AUTO_COLUMNS_EXPR = (
+    '[value parent.vertical_two_inputs] && [numvalue inputs] == 2 ? 1 : '
+    '[expr {int( ceil ( ([numvalue inputs] /(sqrt( [numvalue inputs] )) )) )} ]'
+)
+
 # Guarda contra reentrada: agregar/borrar Input nodes vuelve a disparar knobChanged.
 _busy = False
 
@@ -27,6 +40,18 @@ def _set_input_identity(inp, index):
     inp.setName(_input_name(index))
     if "label" in inp.knobs():
         inp["label"].setValue(str(index + 1))
+
+
+def _ensure_group_knobs(group):
+    if "vertical_two_inputs" not in group.knobs():
+        knob = nuke.Boolean_Knob("vertical_two_inputs", "Vertical Layout for 2 Inputs")
+        knob.setFlag(nuke.STARTLINE)
+        group.addKnob(knob)
+
+
+def _sync_contactsheet_layout_knobs(cs):
+    cs["rows"].setExpression(AUTO_ROWS_EXPR)
+    cs["columns"].setExpression(AUTO_COLUMNS_EXPR)
 
 
 def _burnin_name(index):
@@ -93,10 +118,12 @@ def sync(group):
         return
     _busy = True
     try:
+        _ensure_group_knobs(group)
         connected = _connected_count(group)
         desired = connected + 1  # siempre una rama libre extra
         with group:
             cs = nuke.toNode("ContactSheet1")
+            _sync_contactsheet_layout_knobs(cs)
             existing = {}
             for nd in nuke.allNodes("Input"):
                 existing[int(nd["number"].value())] = nd

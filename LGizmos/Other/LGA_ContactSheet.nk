@@ -11,6 +11,7 @@ Group {
  addUserKnob {7 resMult l "Resolution Multiplier" R 0.1 2}
  resMult 1
  addUserKnob {6 filename_burnin l "Filename Burn-in" +STARTLINE}
+ addUserKnob {6 vertical_two_inputs l "Vertical Layout for 2 Inputs" +STARTLINE}
 }
  Input {
   inputs 0
@@ -36,8 +37,8 @@ Group {
   inputs 1
   width {{input.width*columns*parent.resMult}}
   height {{input.height*rows*parent.resMult}}
-  rows {{"\[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] * \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] ) ) )) )\} ] < \[numvalue inputs]   ? \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] +1 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ]"}}
-  columns {{"\[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] )) )) )\} ]"}}
+  rows {{"\[value parent.vertical_two_inputs] && \[numvalue inputs] == 2 ? 2 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] * \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] ) ) )) )\} ] < \[numvalue inputs]   ? \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] +1 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ]"}}
+  columns {{"\[value parent.vertical_two_inputs] && \[numvalue inputs] == 2 ? 1 : \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] )) )) )\} ]"}}
   center true
   roworder TopBottom
   name ContactSheet1

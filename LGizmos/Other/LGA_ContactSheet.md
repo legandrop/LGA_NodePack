@@ -74,6 +74,10 @@ las mismas expresiones que ContactSheetAuto, leyendo su propio `[numvalue
 inputs]`. Como `sync()` cablea el ContactSheet solo con las ramas conectadas,
 `inputs` refleja la cantidad real y la grilla sale correcta.
 
+El checkbox **Vertical Layout for 2 Inputs** fuerza solo el caso de dos inputs
+a `rows = 2` y `columns = 1`. Para cualquier otra cantidad de inputs se usa el
+auto-grid normal.
+
 ## Burn-in
 
 Cada `Burnin` (Text2) tiene su knob `disable` con la expresion
@@ -93,6 +97,8 @@ Identico al de ContactSheetAuto mas el knob nuevo:
 
 - `Resolution Multiplier` (`resMult`) - igual que el original.
 - `Filename Burn-in` (`filename_burnin`) - checkbox nuevo.
+- `Vertical Layout for 2 Inputs` (`vertical_two_inputs`) - con dos inputs,
+  los apila verticalmente en vez de ponerlos lado a lado.
 
 ## Limitaciones conocidas
 
