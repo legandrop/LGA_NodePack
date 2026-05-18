@@ -92,18 +92,19 @@ El mensaje usa `parent topnode`: `[file tail [value [topnode parent.inputN].file
 `parent.inputN`, arranca desde el input externo del grupo.
 
 El color, la escala y la posicion del texto se controlan desde knobs del grupo.
-`Text Scale` maneja `global_font_scale`; el default `0.505` mantiene el tamano
-original. `Text Offset X/Y` es relativo al box original del burn-in: `0, 0`
-mantiene la posicion actual; valores positivos mueven el texto hacia la
+`Text Scale` maneja `global_font_scale` de forma relativa al ancho del input:
+`Text Scale * input.width / 1920`. El default `0.42` esta calibrado para HD y
+crece automaticamente en UHD/4K. `Text Offset X/Y` es relativo al box calculado:
+`0, 0` mantiene la posicion actual; valores positivos mueven el texto hacia la
 derecha y abajo.
 
 El box del texto se calcula proporcionalmente a la resolucion de cada input,
 manteniendo las proporciones del box original:
 
-- left = `input.width * 0.068262`
-- top = `input.height * 0.079340`
-- right = `input.width * 0.948405`
-- bottom = `input.height * 0.146586`
+- left = `input.width * 0.025`
+- top = `input.height * 0.11`
+- right = `input.width * 0.975`
+- bottom = `input.height * 0.21`
 
 ## Tab Settings
 

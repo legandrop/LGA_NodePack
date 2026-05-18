@@ -12,10 +12,11 @@ ________________________________________________________________________________
 import nuke
 import traceback
 
-BOX_LEFT_FACTOR = 0.068262
-BOX_TOP_FACTOR = 0.07934
-BOX_RIGHT_FACTOR = 0.948405
-BOX_BOTTOM_FACTOR = 0.146586
+BOX_LEFT_FACTOR = 0.025
+BOX_TOP_FACTOR = 0.11
+BOX_RIGHT_FACTOR = 0.975
+BOX_BOTTOM_FACTOR = 0.21
+TEXT_SCALE_BASE_WIDTH = 1920.0
 
 AUTO_ROWS_EXPR = (
     '[value parent.vertical_two_inputs] && [numvalue inputs] == 2 ? 2 : '
@@ -65,7 +66,7 @@ def _ensure_group_knobs(group):
     if "text_font_size" not in group.knobs():
         knob = nuke.Double_Knob("text_font_size", "Text Scale")
         knob.setRange(0.05, 5)
-        knob.setValue(0.505)
+        knob.setValue(0.42)
         group.addKnob(knob)
     if "text_offset_x" not in group.knobs():
         knob = nuke.Double_Knob("text_offset_x", "Text Offset X")
@@ -102,7 +103,9 @@ def _set_burnin_style(t, index):
     t["box"].setExpression(_box_expr(BOX_TOP_FACTOR, "height", "text_offset_y"), 1)
     t["box"].setExpression(_box_expr(BOX_RIGHT_FACTOR, "width", "text_offset_x"), 2)
     t["box"].setExpression(_box_expr(BOX_BOTTOM_FACTOR, "height", "text_offset_y"), 3)
-    t["global_font_scale"].setExpression("parent.text_font_size")
+    t["global_font_scale"].setExpression(
+        "parent.text_font_size * input.width / %.1f" % TEXT_SCALE_BASE_WIDTH
+    )
     t["font_size"].setValue(154)
     t["color"].setExpression("parent.text_color.r", 0)
     t["color"].setExpression("parent.text_color.g", 1)
