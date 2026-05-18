@@ -1,4 +1,5 @@
 #! C:/Program Files/Nuke15.1v6/nuke-15.1.6.dll -nx
+#write_info Write_tEST_2 file:"[file dirname [value [topnode].file]]/../2_prerenders/[join [lrange [split [file rootname [file tail [knob [topnode].file]]] _] 0 4] _]_PNG/[join [lrange [split [file rootname [file tail [knob [topnode].file]]] _] 0 4] _]_%04d.png" format:"4096 2160 1" chans:":rgba.red:rgba.green:rgba.blue:rgba.alpha:" framerange:"1 1281" fps:"24" colorspace:"Output - Rec.709" datatype:"8 bit" transfer:"unknown" views:"main" timecode:"13:24:45:07" colorManagement:"OCIO"
 version 15.1 v6
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
@@ -40,7 +41,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 </dock>
             </splitter>
             <split size="1380"/>
-            <dock id="" activePageId="Viewer.1">
+            <dock id="" activePageId="Viewer.1" focus="true">
                 <page id="Viewer.2"/>
                 <page id="Viewer.1"/>
             </dock>
@@ -168,7 +169,6 @@ name Read3
 xpos 1986
 ypos 48
 }
-set Nde4b2c00 [stack 0]
 Read {
 inputs 0
 file_type exr
@@ -186,6 +186,37 @@ name Read9
 tile_color 0x98c054ff
 xpos 1760
 ypos 59
+}
+Read {
+inputs 0
+file_type mov
+file T:/VFX-TEST/001-021/TEST_014_020/_input/tEST_2_SEGUNDOS.mov
+format "4096 2160 0 0 4096 2160 1 4K_DCP"
+last 42
+origlast 42
+origset true
+colorspace "Output - Rec.709"
+name Read1
+xpos 1372
+ypos 564
+}
+Write {
+channels rgba
+file "\[file dirname \[value \[topnode].file]]/../2_prerenders/\[join \[lrange \[split \[file rootname \[file tail \[knob \[topnode].file]]] _] 0 4] _]_PNG/\[join \[lrange \[split \[file rootname \[file tail \[knob \[topnode].file]]] _] 0 4] _]_%04d.png"
+file_type png
+colorspace "Output - Rec.709"
+create_directories true
+checkHashOnRead false
+version 1
+ocioColorspace default
+display ACES
+view sRGB
+name Write_tEST_2
+xpos 1372
+ypos 664
+addUserKnob {20 User}
+addUserKnob {1 render_time l "Render Time"}
+render_time 00:18:27
 }
 Read {
 inputs 0
@@ -223,12 +254,13 @@ ypos 62
 }
 set Ncfc51000 [stack 0]
 Group {
-inputs 4
+inputs 2
 name LGA_ContactSheet
 onCreate "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.on_create()"
 knobChanged "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.knob_changed()"
-xpos 1344
-ypos 402
+selected true
+xpos 1467
+ypos 403
 addUserKnob {20 Settings}
 addUserKnob {7 resMult l "Resolution Multiplier" R 0.1 2}
 resMult 1
@@ -236,68 +268,12 @@ addUserKnob {6 filename_burnin l "Filename Burn-in" +STARTLINE}
 filename_burnin true
 addUserKnob {6 vertical_two_inputs l "Vertical Layout for 2 Inputs" +STARTLINE}
 vertical_two_inputs true
-}
-Input {
-inputs 0
-name Input4
-label 4
-xpos 480
-number 3
-}
-Text2 {
-font_size_toolbar 100
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[value \[topnode parent.input3].file]]\n"
-old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 100 80 108 97 116 101 95 118 48 49 95 48 53 54 52 46 101 120 114 10}
-  }
-old_expression_markers {{0 32}
-  }
-box {131.0625 85.6875 1820.9375 158.3125}
-transforms {{0 2}
-  }
-global_font_scale 0.505
-font_size 154
-autofit_bbox false
-group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
-animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
-  }
-color {0 1 0 0}
-name Burnin_3
-xpos 480
-ypos 130
-disable {{1-parent.filename_burnin}}
-}
-Input {
-inputs 0
-name Input3
-label 3
-xpos 320
-number 2
-}
-Text2 {
-font_size_toolbar 100
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[value \[topnode parent.input2].file]]\n"
-old_message {{77 79 82 95 49 48 50 48 95 48 54 48 95 99 111 109 112 95 118 48 49 49 95 48 53 54 52 46 101 120 114 10}
-  }
-old_expression_markers {{0 30}
-  }
-box {131.0625 85.6875 1820.9375 158.3125}
-transforms {{0 2}
-  }
-global_font_scale 0.505
-font_size 154
-autofit_bbox false
-group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
-animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
-  }
-color {0 1 0 0}
-name Burnin_2
-xpos 320
-ypos 130
-disable {{1-parent.filename_burnin}}
+addUserKnob {18 text_color l "Text Color"}
+text_color {0.9570000172 1 0.9570000172}
+addUserKnob {6 text_color_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+addUserKnob {7 text_font_size l "Text Font Size" R 1 500}
+text_font_size 250
+addUserKnob {12 text_offset l "Text Offset"}
 }
 Input {
 inputs 0
@@ -315,16 +291,16 @@ old_message {{77 79 82 95 49 48 50 48 95 48 52 48 95 99 111 109 112 95 118 48 49
   }
 old_expression_markers {{0 30}
   }
-box {131.0625 85.6875 1820.9375 158.3125}
+box {{"131.0625 + parent.text_offset.x"} {"85.6875 + parent.text_offset.y"} {"1820.9375 + parent.text_offset.x"} {"158.3125 + parent.text_offset.y"}}
 transforms {{0 2}
   }
 global_font_scale 0.505
-font_size 154
+font_size {{parent.text_font_size}}
 autofit_bbox false
 group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
 animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
   }
-color {0 1 0 0}
+color {{parent.text_color.r} {parent.text_color.g} {parent.text_color.b} 0}
 name Burnin_1
 xpos 160
 ypos 130
@@ -345,23 +321,23 @@ old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 98 80 108 97 116 101 95 
   }
 old_expression_markers {{0 32}
   }
-box {131.0625 85.6875 1820.9375 158.3125}
+box {{"131.0625 + parent.text_offset.x"} {"85.6875 + parent.text_offset.y"} {"1820.9375 + parent.text_offset.x"} {"158.3125 + parent.text_offset.y"}}
 transforms {{0 2}
   }
 global_font_scale 0.505
-font_size 154
+font_size {{parent.text_font_size}}
 autofit_bbox false
 group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
 animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
   }
-color {0 1 0 0}
+color {{parent.text_color.r} {parent.text_color.g} {parent.text_color.b} 0}
 name Burnin_0
 xpos 0
 ypos 130
 disable {{1-parent.filename_burnin}}
 }
 ContactSheet {
-inputs 4
+inputs 2
 width {{input.width*columns*parent.resMult}}
 height {{input.height*rows*parent.resMult}}
 rows {{"\[value parent.vertical_two_inputs] && \[numvalue inputs] == 2 ? 2 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] * \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] ) ) )) )\} ] < \[numvalue inputs]   ? \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] +1 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ]"}}
@@ -379,28 +355,28 @@ ypos 360
 }
 Input {
 inputs 0
-name Input5
-label 5
-xpos 640
-number 4
+name Input3
+label 3
+xpos 320
+number 2
 }
 Text2 {
 font_size_toolbar 100
 font_width_toolbar 100
 font_height_toolbar 100
-message "\[file tail \[value \[topnode parent.input4].file]]\n"
-box {131.0625 85.6875 1820.9375 158.3125}
+message "\[file tail \[value \[topnode parent.input2].file]]\n"
+box {{"131.0625 + parent.text_offset.x"} {"85.6875 + parent.text_offset.y"} {"1820.9375 + parent.text_offset.x"} {"158.3125 + parent.text_offset.y"}}
 transforms {{0 2}
   }
 global_font_scale 0.505
-font_size 154
+font_size {{parent.text_font_size}}
 autofit_bbox false
 group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
 animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
   }
-color {0 1 0 0}
-name Burnin_4
-xpos 640
+color {{parent.text_color.r} {parent.text_color.r} {parent.text_color.r} {parent.text_color.r x564 0}}
+name Burnin_2
+xpos 320
 ypos 130
 disable {{1-parent.filename_burnin}}
 }
@@ -422,36 +398,4 @@ monitorOutNDISenderName "NukeX - contactsheet_review - Viewer1"
 name Viewer1
 xpos 2126
 ypos 963
-}
-push $Nde4b2c00
-Text2 {
-font_size_toolbar 154
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[knob \[topnode].file]]\n"
-old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 100 80 108 97 116 101 95 118 48 49 95 37 48 52 100 46 101 120 114 10}
-  }
-old_expression_markers {{0 32}
-  }
-box {131.0625 85.6875 1820.9375 158.3125}
-transforms {{0 2}
-  }
-font_size_values {{0 154 1 154 2 154 3 154 4 154 5 154 6 154 7 154 8 154 9 154 10 154 11 154 12 154 13 154 14 154 15 154 16 154 17 154 18 154 19 154 20 154 21 154 22 154 23 154 24 154 25 154 26 154 27 154 28 154 29 154 30 154 31 154 32 154 33 154}
-  }
-cursor_position 33
-global_font_scale 0.505
-font_size 154
-scale {1 1}
-cursor_initialised true
-autofit_bbox false
-initial_cursor_position {{1360 263.5}
-  }
-group_animations {{0} imported: 0 selected: items: "root transform/"}
-animation_layers {{1 11 2560 1080 0 0 1 1 0 0 0 0}
-  }
-color {0 1 0 0}
-color_panelDropped true
-name Text1
-xpos 1978
-ypos 183
 }

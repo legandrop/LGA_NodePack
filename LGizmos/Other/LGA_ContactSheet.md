@@ -88,8 +88,12 @@ Cada `Burnin` (Text2) tiene su knob `disable` con la expresion
 
 El mensaje usa `parent topnode`: `[file tail [value [topnode parent.inputN].file]]`.
 `topnode` a secas se queda en el nodo `Input` interno del grupo; con
-`parent.inputN`, arranca desde el input externo del grupo. Mismo estilo verde, `font_size` 154,
-`global_font_scale` 0.505 y `box` que el script original.
+`parent.inputN`, arranca desde el input externo del grupo.
+
+El color, el tamano y la posicion del texto se controlan desde knobs del grupo.
+`Text Offset` es relativo al box original del burn-in: `0, 0` mantiene la
+posicion actual; valores positivos mueven el texto hacia la derecha y abajo.
+El `global_font_scale` queda fijo en `0.505`, como el script original.
 
 ## Tab Settings
 
@@ -99,15 +103,13 @@ Identico al de ContactSheetAuto mas el knob nuevo:
 - `Filename Burn-in` (`filename_burnin`) - checkbox nuevo.
 - `Vertical Layout for 2 Inputs` (`vertical_two_inputs`) - con dos inputs,
   los apila verticalmente en vez de ponerlos lado a lado.
+- `Text Color` (`text_color`) - color del burn-in.
+- `Text Font Size` (`text_font_size`) - tamano de fuente del burn-in.
+- `Text Offset` (`text_offset`) - desplazamiento X/Y relativo a la posicion
+  original del texto.
 
 ## Limitaciones conocidas
 
 - Conviene conectar y desconectar los inputs **desde el final**. Si se
   desconecta un input del medio, `sync()` cuenta los conectados contiguos
   desde 0 y puede borrar ramas que estaban mas arriba.
-
-## Futuro
-
-Por ahora el burn-in es de estilo fijo (identico al original). Mas adelante se
-agregaran controles en el panel para configurar tamano / color / posicion del
-texto.

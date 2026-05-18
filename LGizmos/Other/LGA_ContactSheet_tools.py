@@ -12,6 +12,8 @@ ________________________________________________________________________________
 import nuke
 import traceback
 
+BASE_TEXT_BOX = [131.0625, 85.6875, 1820.9375, 158.3125]
+
 AUTO_ROWS_EXPR = (
     '[value parent.vertical_two_inputs] && [numvalue inputs] == 2 ? 2 : '
     '[expr {int( (sqrt( [numvalue inputs] ) ) )} ] * '
@@ -47,6 +49,19 @@ def _ensure_group_knobs(group):
         knob = nuke.Boolean_Knob("vertical_two_inputs", "Vertical Layout for 2 Inputs")
         knob.setFlag(nuke.STARTLINE)
         group.addKnob(knob)
+    if "text_color" not in group.knobs():
+        knob = nuke.Color_Knob("text_color", "Text Color")
+        knob.setValue([0.0, 1.0, 0.0])
+        group.addKnob(knob)
+    if "text_font_size" not in group.knobs():
+        knob = nuke.Double_Knob("text_font_size", "Text Font Size")
+        knob.setRange(1, 500)
+        knob.setValue(154)
+        group.addKnob(knob)
+    if "text_offset" not in group.knobs():
+        knob = nuke.XY_Knob("text_offset", "Text Offset")
+        knob.setValue([0.0, 0.0])
+        group.addKnob(knob)
 
 
 def _sync_contactsheet_layout_knobs(cs):
@@ -64,10 +79,32 @@ def _burnin_message(index):
 
 def _set_burnin_style(t, index):
     t["message"].setValue(_burnin_message(index))
-    t["box"].setValue([131.0625, 85.6875, 1820.9375, 158.3125])
+    t["box"].setExpression(
+        "%s + parent.text_offset.x" % BASE_TEXT_BOX[0],
+        0,
+    )
+    t["box"].setExpression(
+        "%s + parent.text_offset.y" % BASE_TEXT_BOX[1],
+        1,
+    )
+    t["box"].setExpression(
+        "%s + parent.text_offset.x" % BASE_TEXT_BOX[2],
+        2,
+    )
+    t["box"].setExpression(
+        "%s + parent.text_offset.y" % BASE_TEXT_BOX[3],
+        3,
+    )
     t["global_font_scale"].setValue(0.505)
-    t["font_size"].setValue(154)
-    t["color"].setValue([0.0, 1.0, 0.0, 0.0])
+    t["font_size"].setExpression("parent.text_font_size")
+    t["color"].setExpression("parent.text_color.r", 0)
+    t["color"].setExpression("parent.text_color.g", 1)
+    t["color"].setExpression("parent.text_color.b", 2)
+    try:
+        t["color"].clearAnimated(3)
+    except Exception:
+        pass
+    t["color"].setValue(0.0, 3)
     t["autofit_bbox"].setValue(False)
     t["disable"].setExpression("1-parent.filename_burnin")
 

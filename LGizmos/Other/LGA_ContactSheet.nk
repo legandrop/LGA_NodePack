@@ -12,6 +12,11 @@ Group {
  resMult 1
  addUserKnob {6 filename_burnin l "Filename Burn-in" +STARTLINE}
  addUserKnob {6 vertical_two_inputs l "Vertical Layout for 2 Inputs" +STARTLINE}
+ addUserKnob {18 text_color l "Text Color"}
+ text_color {0 1 0}
+ addUserKnob {7 text_font_size l "Text Font Size" R 1 500}
+ text_font_size 154
+ addUserKnob {12 text_offset l "Text Offset"}
 }
  Input {
   inputs 0
@@ -23,11 +28,11 @@ Group {
  }
  Text2 {
   message "\[file tail \[value \[topnode parent.input0].file]]\n"
-  box {131.0625 85.6875 1820.9375 158.3125}
+  box {{131.0625+parent.text_offset.x} {85.6875+parent.text_offset.y} {1820.9375+parent.text_offset.x} {158.3125+parent.text_offset.y}}
   global_font_scale 0.505
-  font_size 154
+  font_size {{parent.text_font_size}}
   autofit_bbox false
-  color {0 1 0 0}
+  color {{parent.text_color.r} {parent.text_color.g} {parent.text_color.b} 0}
   disable {{1-parent.filename_burnin}}
   name Burnin_0
   xpos 0
