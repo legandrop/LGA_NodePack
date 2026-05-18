@@ -16,6 +16,9 @@ BOX_LEFT_FACTOR = 0.025
 BOX_TOP_FACTOR = 0.11
 BOX_RIGHT_FACTOR = 0.975
 BOX_BOTTOM_FACTOR = 0.21
+BOX_AUTO_OFFSET_X_FACTOR = -0.005208
+BOX_AUTO_OFFSET_Y_FACTOR = -0.138889
+TEXT_SCALE_BASE = 0.5
 TEXT_SCALE_BASE_WIDTH = 1920.0
 
 AUTO_ROWS_EXPR = (
@@ -66,7 +69,7 @@ def _ensure_group_knobs(group):
     if "text_font_size" not in group.knobs():
         knob = nuke.Double_Knob("text_font_size", "Text Scale")
         knob.setRange(0.05, 5)
-        knob.setValue(0.42)
+        knob.setValue(1.0)
         group.addKnob(knob)
     if "text_offset_x" not in group.knobs():
         knob = nuke.Double_Knob("text_offset_x", "Text Offset X")
@@ -99,12 +102,25 @@ def _box_expr(factor, axis, offset_knob):
 
 def _set_burnin_style(t, index):
     t["message"].setValue(_burnin_message(index))
-    t["box"].setExpression(_box_expr(BOX_LEFT_FACTOR, "width", "text_offset_x"), 0)
-    t["box"].setExpression(_box_expr(BOX_TOP_FACTOR, "height", "text_offset_y"), 1)
-    t["box"].setExpression(_box_expr(BOX_RIGHT_FACTOR, "width", "text_offset_x"), 2)
-    t["box"].setExpression(_box_expr(BOX_BOTTOM_FACTOR, "height", "text_offset_y"), 3)
+    t["box"].setExpression(
+        _box_expr(BOX_LEFT_FACTOR + BOX_AUTO_OFFSET_X_FACTOR, "width", "text_offset_x"),
+        0,
+    )
+    t["box"].setExpression(
+        _box_expr(BOX_TOP_FACTOR + BOX_AUTO_OFFSET_Y_FACTOR, "height", "text_offset_y"),
+        1,
+    )
+    t["box"].setExpression(
+        _box_expr(BOX_RIGHT_FACTOR + BOX_AUTO_OFFSET_X_FACTOR, "width", "text_offset_x"),
+        2,
+    )
+    t["box"].setExpression(
+        _box_expr(BOX_BOTTOM_FACTOR + BOX_AUTO_OFFSET_Y_FACTOR, "height", "text_offset_y"),
+        3,
+    )
     t["global_font_scale"].setExpression(
-        "parent.text_font_size * input.width / %.1f" % TEXT_SCALE_BASE_WIDTH
+        "parent.text_font_size * %.3f * input.width / %.1f"
+        % (TEXT_SCALE_BASE, TEXT_SCALE_BASE_WIDTH)
     )
     t["font_size"].setValue(154)
     t["color"].setExpression("parent.text_color.r", 0)

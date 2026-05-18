@@ -93,18 +93,18 @@ El mensaje usa `parent topnode`: `[file tail [value [topnode parent.inputN].file
 
 El color, la escala y la posicion del texto se controlan desde knobs del grupo.
 `Text Scale` maneja `global_font_scale` de forma relativa al ancho del input:
-`Text Scale * input.width / 1920`. El default `0.42` esta calibrado para HD y
-crece automaticamente en UHD/4K. `Text Offset X/Y` es relativo al box calculado:
+`Text Scale * 0.5 * input.width / 1920`. El default visible es `1`, calibrado
+para HD y crece automaticamente en UHD/4K. `Text Offset X/Y` es relativo al box calculado:
 `0, 0` mantiene la posicion actual; valores positivos mueven el texto hacia la
 derecha y abajo.
 
 El box del texto se calcula proporcionalmente a la resolucion de cada input,
-manteniendo las proporciones del box original:
+con un offset automatico tambien proporcional a la resolucion:
 
-- left = `input.width * 0.025`
-- top = `input.height * 0.11`
-- right = `input.width * 0.975`
-- bottom = `input.height * 0.21`
+- left = `input.width * 0.019792`
+- top = `input.height * -0.028889`
+- right = `input.width * 0.969792`
+- bottom = `input.height * 0.071111`
 
 ## Tab Settings
 

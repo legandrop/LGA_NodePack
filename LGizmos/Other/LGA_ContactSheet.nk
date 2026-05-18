@@ -17,7 +17,7 @@ Group {
  addUserKnob {18 text_color l "Text Color"}
  text_color {1 1 1}
  addUserKnob {7 text_font_size l "Text Scale" R 0.05 5}
- text_font_size 0.42
+ text_font_size 1
  addUserKnob {7 text_offset_x l "Text Offset X" R -5000 5000}
  addUserKnob {7 text_offset_y l "Text Offset Y" R -5000 5000}
 }
@@ -31,8 +31,8 @@ Group {
  }
  Text2 {
   message "\[file tail \[value \[topnode parent.input0].file]]\n"
-  box {{input.width*0.025+parent.text_offset_x} {input.height*0.11+parent.text_offset_y} {input.width*0.975+parent.text_offset_x} {input.height*0.21+parent.text_offset_y}}
-  global_font_scale {{parent.text_font_size*input.width/1920.0}}
+  box {{input.width*0.019792+parent.text_offset_x} {input.height*-0.028889+parent.text_offset_y} {input.width*0.969792+parent.text_offset_x} {input.height*0.071111+parent.text_offset_y}}
+  global_font_scale {{parent.text_font_size*0.5*input.width/1920.0}}
   font_size 154
   autofit_bbox false
   color {{parent.text_color.r} {parent.text_color.g} {parent.text_color.b} 0}
