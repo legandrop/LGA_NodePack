@@ -11,6 +11,7 @@ Group {
  addUserKnob {7 resMult l "Resolution Multiplier" R 0.1 2}
  resMult 1
  addUserKnob {6 filename_burnin l "Filename Burn-in" +STARTLINE}
+ addUserKnob {4 filename_formula l "Filename Formula" M {"parent topnode" "direct parent input" "metadata input/filename" "python parent input"}}
 }
  Input {
   inputs 0
@@ -21,13 +22,13 @@ Group {
   ypos 0
  }
  Text2 {
-  message "\[file tail \[knob \[topnode].file]]\n"
+  message "\[file tail \[value \[topnode parent.input0].file]]\n"
   box {131.0625 85.6875 1820.9375 158.3125}
   global_font_scale 0.505
   font_size 154
   autofit_bbox false
   color {0 1 0 0}
-  disable {{1-parent.filename_burnin}}
+  disable {{1-parent.filename_burnin || parent.filename_formula != 0}}
   name Burnin_0
   xpos 0
   ypos 130

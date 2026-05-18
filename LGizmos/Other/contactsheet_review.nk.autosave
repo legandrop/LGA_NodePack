@@ -13,6 +13,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
                 <split size="994"/>
                 <dock id="" activePageId="DAG.1">
                     <page id="DAG.1"/>
+                    <page id="DAG.2"/>
                 </dock>
                 <split size="321"/>
                 <splitter orientation="1">
@@ -51,7 +52,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 Root {
 inputs 0
 name C:/Users/leg4-pc/.nuke/LGA_NodePack/LGizmos/Other/contactsheet_review.nk
-frame 1001
+frame 961
 last_frame 1281
 format "3840 1612 0 0 3840 1612 1 3840x1612"
 proxy_type scale
@@ -217,6 +218,7 @@ tile_color 0x98c054ff
 xpos 1760
 ypos 59
 }
+set Ncfc50000 [stack 0]
 Text2 {
 font_size_toolbar 154
 font_width_toolbar 100
@@ -248,7 +250,6 @@ name Text3
 xpos 1760
 ypos 183
 }
-set Ncfc50400 [stack 0]
 Read {
 inputs 0
 file_type exr
@@ -267,6 +268,7 @@ tile_color 0x7f4b69ff
 xpos 1573
 ypos 75
 }
+set Ncfc50800 [stack 0]
 Text2 {
 font_size_toolbar 154
 font_width_toolbar 100
@@ -298,7 +300,6 @@ name Text2
 xpos 1573
 ypos 183
 }
-set Ncfc50c00 [stack 0]
 Read {
 inputs 0
 file_type exr
@@ -315,6 +316,7 @@ name Read4
 xpos 1390
 ypos 62
 }
+set Ncfc51000 [stack 0]
 Text2 {
 font_size_toolbar 154
 font_width_toolbar 100
@@ -343,10 +345,9 @@ animation_layers {{1 11 2560 1080 0 0 1 1 0 0 0 0}
 color {0 1 0 0}
 color_panelDropped true
 name Text27
-xpos 1390
-ypos 180
+xpos 1410
+ypos 198
 }
-set Ncfc51400 [stack 0]
 ContactSheet {
 inputs 4
 width {{input.width*columns*resMult}}
@@ -411,118 +412,23 @@ xpos 1565
 ypos 412
 bookmark true
 }
-push $Ncfc50400
-push $Ncfc50c00
-push $Ncfc51400
+push $Ncfc50000
+push $Ncfc50800
+push $Ncfc51000
 Group {
 inputs 3
 name LGA_ContactSheet
 onCreate "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.on_create()"
 knobChanged "import importlib\nimport LGA_ContactSheet_tools as m\nimportlib.reload(m)\nm.knob_changed()"
 selected true
-xpos 1390
-ypos 398
+xpos 1382
+ypos 393
 addUserKnob {20 Settings}
 addUserKnob {7 resMult l "Resolution Multiplier" R 0.1 2}
 resMult 1
 addUserKnob {6 filename_burnin l "Filename Burn-in" +STARTLINE}
-}
-Input {
-inputs 0
-name Input3
-label 3
-xpos 320
-number 2
-}
-Text2 {
-font_size_toolbar 100
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[knob \[topnode].file]]\n"
-box {131.0625 85.6875 1820.9375 158.3125}
-transforms {{0 2}
-  }
-global_font_scale 0.505
-font_size 154
-autofit_bbox false
-group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
-animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
-  }
-color {0 1 0 0}
-name Burnin_2
-xpos 320
-ypos 130
-disable {{1-parent.filename_burnin}}
-}
-Input {
-inputs 0
-name Input2
-label 2
-xpos 160
-number 1
-}
-Text2 {
-font_size_toolbar 100
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[knob \[topnode].file]]\n"
-box {131.0625 85.6875 1820.9375 158.3125}
-transforms {{0 2}
-  }
-global_font_scale 0.505
-font_size 154
-autofit_bbox false
-group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
-animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
-  }
-color {0 1 0 0}
-name Burnin_1
-xpos 160
-ypos 130
-disable {{1-parent.filename_burnin}}
-}
-Input {
-inputs 0
-name Input1
-label 1
-xpos 0
-}
-Text2 {
-font_size_toolbar 100
-font_width_toolbar 100
-font_height_toolbar 100
-message "\[file tail \[knob \[topnode].file]]\n"
-box {131.0625 85.6875 1820.9375 158.3125}
-transforms {{0 2}
-  }
-global_font_scale 0.505
-font_size 154
-autofit_bbox false
-group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
-animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
-  }
-color {0 1 0 0}
-name Burnin_0
-xpos 0
-ypos 130
-disable {{1-parent.filename_burnin}}
-}
-ContactSheet {
-inputs 3
-width {{input.width*columns*parent.resMult}}
-height {{input.height*rows*parent.resMult}}
-rows {{"\[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] * \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] ) ) )) )\} ] < \[numvalue inputs]   ? \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] +1 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ]"}}
-columns {{"\[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] )) )) )\} ]"}}
-center true
-roworder TopBottom
-name ContactSheet1
-xpos 0
-ypos 260
-}
-Output {
-name Output1
-xpos 0
-ypos 360
+filename_burnin true
+addUserKnob {4 filename_formula l "Filename Formula" M {"parent topnode" "direct parent input" "metadata input/filename" "python parent input"}}
 }
 Input {
 inputs 0
@@ -535,7 +441,7 @@ Text2 {
 font_size_toolbar 100
 font_width_toolbar 100
 font_height_toolbar 100
-message "\[file tail \[knob \[topnode].file]]\n"
+message "\[file tail \[value \[topnode parent.input3].file]]\n"
 box {131.0625 85.6875 1820.9375 158.3125}
 transforms {{0 2}
   }
@@ -549,13 +455,395 @@ color {0 1 0 0}
 name Burnin_3
 xpos 480
 ypos 130
-disable {{1-parent.filename_burnin}}
+disable {{"1-parent.filename_burnin || parent.filename_formula != 0"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[input parent 3].file \"\"]]\n"
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninDirect_3
+xpos 480
+ypos 220
+disable {{"1-parent.filename_burnin || parent.filename_formula != 1"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[metadata input/filename]]\n"
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninMetadata_3
+xpos 480
+ypos 310
+disable {{"1-parent.filename_burnin || parent.filename_formula != 2"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[python \{import os, nuke; src=nuke.thisNode().parent().input(3); os.path.basename(nuke.filename(src) or '') if src else ''\}]\n"
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninPython_3
+xpos 480
+ypos 400
+disable {{"1-parent.filename_burnin || parent.filename_formula != 3"}}
+}
+Input {
+inputs 0
+name Input3
+label 3
+xpos 320
+number 2
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[topnode parent.input2].file]]\n"
+old_message {{77 79 82 95 49 48 50 48 95 48 54 48 95 99 111 109 112 95 118 48 49 49 95 48 57 54 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 30}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name Burnin_2
+xpos 320
+ypos 130
+disable {{"1-parent.filename_burnin || parent.filename_formula != 0"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[input parent 2].file \"\"]]\n"
+old_message {{77 79 82 95 49 48 50 48 95 48 54 48 95 99 111 109 112 95 118 48 49 49 95 49 48 48 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 30}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninDirect_2
+xpos 320
+ypos 220
+disable {{"1-parent.filename_burnin || parent.filename_formula != 1"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[metadata input/filename]]\n"
+old_message {{77 79 82 95 49 48 50 48 95 48 54 48 95 99 111 109 112 95 118 48 49 49 95 49 48 48 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 30}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninMetadata_2
+xpos 320
+ypos 310
+disable {{"1-parent.filename_burnin || parent.filename_formula != 2"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[python \{import os, nuke; src=nuke.thisNode().parent().input(2); os.path.basename(nuke.filename(src) or '') if src else ''\}]\n"
+old_message {{91 112 121 116 104 111 110 32 123 105 109 112 111 114 116 32 111 115 44 32 110 117 107 101 59 32 115 114 99 61 110 117 107 101 46 116 104 105 115 78 111 100 101 40 41 46 112 97 114 101 110 116 40 41 46 105 110 112 117 116 40 50 41 59 32 111 115 46 112 97 116 104 46 98 97 115 101 110 97 109 101 40 110 117 107 101 46 102 105 108 101 110 97 109 101 40 115 114 99 41 32 111 114 32 39 39 41 32 105 102 32 115 114 99 32 101 108 115 101 32 39 39 125 93 10}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninPython_2
+xpos 320
+ypos 400
+disable {{"1-parent.filename_burnin || parent.filename_formula != 3"}}
+}
+Input {
+inputs 0
+name Input2
+label 2
+xpos 160
+number 1
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[topnode parent.input1].file]]\n"
+old_message {{77 79 82 95 49 48 50 48 95 48 52 48 95 99 111 109 112 95 118 48 49 53 95 48 57 54 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 30}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name Burnin_1
+xpos 160
+ypos 130
+disable {{"1-parent.filename_burnin || parent.filename_formula != 0"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[input parent 1].file \"\"]]\n"
+old_message {{77 79 82 95 49 48 50 48 95 48 52 48 95 99 111 109 112 95 118 48 49 53 95 49 48 48 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 30}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninDirect_1
+xpos 160
+ypos 220
+disable {{"1-parent.filename_burnin || parent.filename_formula != 1"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[metadata input/filename]]\n"
+old_message {{77 79 82 95 49 48 50 48 95 48 52 48 95 99 111 109 112 95 118 48 49 53 95 49 48 48 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 30}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninMetadata_1
+xpos 160
+ypos 310
+disable {{"1-parent.filename_burnin || parent.filename_formula != 2"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[python \{import os, nuke; src=nuke.thisNode().parent().input(1); os.path.basename(nuke.filename(src) or '') if src else ''\}]\n"
+old_message {{91 112 121 116 104 111 110 32 123 105 109 112 111 114 116 32 111 115 44 32 110 117 107 101 59 32 115 114 99 61 110 117 107 101 46 116 104 105 115 78 111 100 101 40 41 46 112 97 114 101 110 116 40 41 46 105 110 112 117 116 40 49 41 59 32 111 115 46 112 97 116 104 46 98 97 115 101 110 97 109 101 40 110 117 107 101 46 102 105 108 101 110 97 109 101 40 115 114 99 41 32 111 114 32 39 39 41 32 105 102 32 115 114 99 32 101 108 115 101 32 39 39 125 93 10}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninPython_1
+xpos 160
+ypos 400
+disable {{"1-parent.filename_burnin || parent.filename_formula != 3"}}
+}
+Input {
+inputs 0
+name Input1
+label 1
+xpos 0
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[topnode parent.input0].file]]\n"
+old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 98 80 108 97 116 101 95 118 48 49 95 48 57 54 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 32}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+scale {1 1}
+autofit_bbox false
+group_animations {{0} imported: 0 selected: items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name Burnin_0
+selected true
+xpos 0
+ypos 130
+disable {{"1-parent.filename_burnin || parent.filename_formula != 0" l 0}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[value \[input parent 0].file \"\"]]\n"
+old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 98 80 108 97 116 101 95 118 48 49 95 48 57 54 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 32}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninDirect_0
+xpos 0
+ypos 220
+disable {{"1-parent.filename_burnin || parent.filename_formula != 1"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[file tail \[metadata input/filename]]\n"
+old_message {{77 79 82 95 49 48 49 50 67 95 48 49 48 95 98 80 108 97 116 101 95 118 48 49 95 49 48 48 49 46 101 120 114 10}
+  }
+old_expression_markers {{0 32}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninMetadata_0
+xpos 0
+ypos 310
+disable {{"1-parent.filename_burnin || parent.filename_formula != 2"}}
+}
+Text2 {
+font_size_toolbar 100
+font_width_toolbar 100
+font_height_toolbar 100
+message "\[python \{import os, nuke; src=nuke.thisNode().parent().input(0); os.path.basename(nuke.filename(src) or '') if src else ''\}]\n"
+old_message {{91 112 121 116 104 111 110 32 123 105 109 112 111 114 116 32 111 115 44 32 110 117 107 101 59 32 115 114 99 61 110 117 107 101 46 116 104 105 115 78 111 100 101 40 41 46 112 97 114 101 110 116 40 41 46 105 110 112 117 116 40 48 41 59 32 111 115 46 112 97 116 104 46 98 97 115 101 110 97 109 101 40 110 117 107 101 46 102 105 108 101 110 97 109 101 40 115 114 99 41 32 111 114 32 39 39 41 32 105 102 32 115 114 99 32 101 108 115 101 32 39 39 125 93 10}
+  }
+box {131.0625 85.6875 1820.9375 158.3125}
+transforms {{0 2}
+  }
+global_font_scale 0.505
+font_size 154
+autofit_bbox false
+group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+animation_layers {{1 11 1920 806 0 0 1 1 0 0 0 0}
+  }
+color {0 1 0 0}
+name BurninPython_0
+xpos 0
+ypos 400
+disable {{"1-parent.filename_burnin || parent.filename_formula != 3"}}
+}
+ContactSheet {
+inputs 3
+width {{input.width*columns*parent.resMult}}
+height {{input.height*rows*parent.resMult}}
+rows {{"\[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] * \[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] ) ) )) )\} ] < \[numvalue inputs]   ? \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ] +1 : \[expr \{int( (sqrt( \[numvalue inputs] ) ) )\} ]"}}
+columns {{"\[expr \{int( ceil ( (\[numvalue inputs] /(sqrt( \[numvalue inputs] )) )) )\} ]"}}
+center true
+roworder TopBottom
+name ContactSheet1
+xpos 220
+ypos 572
+}
+Output {
+name Output1
+xpos 220
+ypos 641
 }
 end_group
 push 0
 push 0
 Viewer {
 inputs 3
+frame 961
 frame_range 1-1107
 frame_range_lock true
 input_number 2
