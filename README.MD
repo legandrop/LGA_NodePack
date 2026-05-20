@@ -11,6 +11,22 @@ Es una libreria de nodos de uso diario: algunos vienen de recursos publicos,
 otros estan levemente modificados, otros son toolsets rapidos, y otros son
 nodos propios.
 
+La parte importante del pack es que no hace falta editar `menu.py` cada vez que
+se agrega un nodo. El cargador recorre automaticamente las carpetas y
+subcarpetas del repositorio, replica esa estructura en el menu **Nodes** de
+Nuke y agrega cada archivo compatible que encuentra:
+
+- Los `.gizmo` aparecen como nodos normales y se crean con `nuke.createNode()`.
+- Los `.nk` aparecen en el menu y se cargan como toolsets.
+- Las carpetas tambien se agregan al plugin path, asi los gizmos quedan
+  disponibles sin registrar cada uno a mano.
+- Si una carpeta ya trae su propio `menu.py` o `init.py`, como `pixelfudger3`
+  o `spin_tools`, el pack la deja manejar su propia carga.
+
+En la practica, para sumar un gizmo, un group guardado como `.nk` o un toolset,
+solo hay que copiarlo dentro de la categoria correspondiente. Al reiniciar
+Nuke, aparece automaticamente en el menu siguiendo la estructura de carpetas.
+
 ## Instalacion
 
 Copiar la carpeta **LGA_NodePack** a **%USERPROFILE%/.nuke** y agregar en el
@@ -38,11 +54,10 @@ El pack agrega menus al panel **Nodes**:
 
 - **LGizmos**: la coleccion principal, organizada por categorias.
 - **Pixelfudger3**: pack original de Xavier Bourque, con menu propio.
-- **Spin Tools**: set de gizmos organizado por 3D, Color, Comp, Effects y
+- **Spin Tools**: set de gizmos creado por el estudio SPIN VFX
   Keying.
 
-El menu se arma automaticamente. Si se agrega un `.gizmo` o `.nk` dentro de una
-carpeta cargada, aparece en Nuke siguiendo la estructura de carpetas.
+El menu se arma automaticamente a partir del contenido real de las carpetas.
 
 ## Tipos de nodos
 
@@ -83,8 +98,8 @@ Ejemplos:
 
 ### Nodos propios
 
-Los nodos que empiezan con **`LGA_`** son nodos hechos o armados por Lega para
-resolver necesidades mas especificas.
+Los nodos que empiezan con **`LGA_`** son nodos propios o versiones creadas
+para resolver necesidades mas especificas.
 
 Ejemplos:
 
@@ -122,20 +137,3 @@ La carpeta **LGizmos** esta ordenada por uso:
 - **Track**: reference pin y estabilizado/precomp.
 - **Utilities**: utilidades chicas.
 
-## Para mantener el pack
-
-- Agregar gizmos o toolsets dentro de la categoria correspondiente.
-- Usar prefijo **`LGA_`** para nodos propios.
-- Usar prefijo **`LGAt_`** para toolsets simples.
-- Usar sufijo **`_LGA`** cuando sea una modificacion de un nodo externo.
-- Mantener las carpetas con `menu.py` propio, como Pixelfudger o Spin Tools,
-  separadas.
-- Si un nodo necesita explicacion larga, agregar un `.md` al lado del `.nk` o
-  `.gizmo` en vez de inflar este README.
-
-## Resumen
-
-Este repositorio es una caja de nodos para comp: liviana, directa y facil de
-extender. El valor esta en tener los nodos ordenados, disponibles desde el menu
-de Nuke y con una convencion minima para distinguir que es propio, que es un
-toolset rapido y que viene de otro lado con modificaciones.
