@@ -1,5 +1,9 @@
 __pycache__/
 *.pyc
+.git/
+.gitignore
+*.autosave
+*.tmp
 +OLD/
 OLD/
 Building_Blocks/
