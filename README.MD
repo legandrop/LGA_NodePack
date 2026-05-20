@@ -1,6 +1,6 @@
 <p>
   <span style="font-size:1.6em;font-weight:700;line-height:1;">LGA NODE PACK</span><br>
-  <span style="font-style:italic;line-height:1;">Lega | v1.32</span><br>
+  <span style="font-style:italic;line-height:1;">Lega | v1.43</span><br>
 </p>
 
 **LGA Node Pack** es una coleccion simple de nodos para Nuke: gizmos,
