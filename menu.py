@@ -1,7 +1,7 @@
 """
 ___________________________________________________________________________________________
 
-  LGA_NodePack v1.43 Lega Pugliese
+  LGA_NodePack v1.44 Lega Pugliese
   Automatically imports all tools located within folders and subfolders into the Node Bar
 ___________________________________________________________________________________________
 
