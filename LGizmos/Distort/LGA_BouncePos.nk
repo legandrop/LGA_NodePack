@@ -1,0 +1,55 @@
+set cut_paste_input [stack 0]
+version 15.1 v6
+push $cut_paste_input
+Group {
+ name LGA_BouncePos
+ onCreate "import nuke\nn = nuke.thisNode()\ntry:\n    n['bounce_output'].setEnabled(False)\nexcept Exception:\n    pass"
+ knobChanged "import nuke\nn = nuke.thisNode()\nk = nuke.thisKnob()\nif k and k.name() in ['showPanel', 'bounce_output']:\n    try:\n        n['bounce_output'].setEnabled(False)\n    except Exception:\n        pass"
+ tile_color 0xa57aaaff
+ selected true
+ addUserKnob {20 BouncePos}
+ addUserKnob {26 source_note l "" T "Bounce is calculated from this translate motion. Animate it here, or link it from a another Transform."}
+ addUserKnob {12 translate l "Source Translate"}
+ addUserKnob {26 ""}
+ addUserKnob {7 amount l Amount R -100 100}
+ amount 1
+ addUserKnob {3 lookahead l Lookahead R 1 20}
+ lookahead 1
+ addUserKnob {3 delay l Delay R -20 20}
+ addUserKnob {7 x_mult l "X Mult" R -10 10}
+ x_mult 1
+ addUserKnob {7 y_mult l "Y Mult" R -10 10}
+ y_mult 1
+ addUserKnob {7 max_offset l "Max Offset" R 0 500}
+ max_offset 100
+ addUserKnob {26 ""}
+ addUserKnob {12 bounce_output l "Bounce Output"}
+ bounce_output {{max(min(-((translate.x(frame-delay-max(lookahead,1))-(2*translate.x(frame-delay))+translate.x(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*x_mult,max_offset),-max_offset)} {max(min(-((translate.y(frame-delay-max(lookahead,1))-(2*translate.y(frame-delay))+translate.y(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*y_mult,max_offset),-max_offset)}}
+ addUserKnob {26 ""}
+ addUserKnob {41 filter T Bounce_Transform.filter}
+ addUserKnob {41 motionblur T Bounce_Transform.motionblur}
+ addUserKnob {41 shutter T Bounce_Transform.shutter}
+ addUserKnob {26 about l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>LGA_BouncePos v0.2</b> - live position bounce from source translate acceleration.</span>"}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 0
+  ypos 0
+ }
+ Transform {
+  translate {{max(min(-((parent.translate.x(frame-parent.delay-max(parent.lookahead,1))-(2*parent.translate.x(frame-parent.delay))+parent.translate.x(frame-parent.delay+max(parent.lookahead,1)))/(max(parent.lookahead,1)*max(parent.lookahead,1)))*parent.amount*parent.x_mult,parent.max_offset),-parent.max_offset)} {max(min(-((parent.translate.y(frame-parent.delay-max(parent.lookahead,1))-(2*parent.translate.y(frame-parent.delay))+parent.translate.y(frame-parent.delay+max(parent.lookahead,1)))/(max(parent.lookahead,1)*max(parent.lookahead,1)))*parent.amount*parent.y_mult,parent.max_offset),-parent.max_offset)}}
+  center {{input.width/2} {input.height/2}}
+  black_outside false
+  disable {{parent.disable}}
+  name Bounce_Transform
+  label "output: [value translate.x], [value translate.y]"
+  xpos 0
+  ypos 80
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 160
+ }
+end_group
