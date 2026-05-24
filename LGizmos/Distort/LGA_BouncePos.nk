@@ -6,29 +6,23 @@ Group {
  tile_color 0xa57aaaff
  selected true
  addUserKnob {20 BouncePos}
- addUserKnob {26 source_note l "" T "Bounce is calculated from this translate motion. Animate it here, or link it from a another Transform."}
- addUserKnob {12 translate l "Source Translate"}
+ addUserKnob {26 source_note l "" T "<span style=\"color:#979797\">Bounce is calculated from this translate motion.<br/>Animate it here, or link it from a another Transform.</span><br/><span style=\"font-size:4px\">&nbsp;</span>"}
+ addUserKnob {12 translate l "Source Translate" +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {7 amount l Amount R -100 100}
+ addUserKnob {7 amount l Amount t "Overall bounce strength. 0 disables the generated offset; negative values invert the bounce direction." R -4 4}
  amount 1
- addUserKnob {3 lookahead l Lookahead R 1 20}
+ addUserKnob {7 lookahead l Lookahead t "Number of frames sampled before and after the current frame. Higher values react to broader motion changes; lower values react to sharper frame-to-frame changes." R 1 15}
  lookahead 1
- addUserKnob {3 delay l Delay R -20 20}
- addUserKnob {7 x_mult l "X Mult" R -10 10}
+ addUserKnob {7 delay l Delay t "Shifts the sampled source motion in time. Positive values make the bounce use earlier motion; negative values make it anticipate later motion." R -10 10}
+ addUserKnob {7 x_mult l "X Mult" t "Multiplier for the generated horizontal bounce. 0 removes X bounce; negative values invert only X." R -4 4}
  x_mult 1
- addUserKnob {7 y_mult l "Y Mult" R -10 10}
+ addUserKnob {7 y_mult l "Y Mult" t "Multiplier for the generated vertical bounce. 0 removes Y bounce; negative values invert only Y." R -4 4}
  y_mult 1
- addUserKnob {7 max_offset l "Max Offset" R 0 500}
+ addUserKnob {7 max_offset l "Max Offset" t "Maximum generated offset in pixels for each axis. This clamps extreme bounce values so the result cannot jump too far." R 0 500}
  max_offset 100
  addUserKnob {26 ""}
  addUserKnob {12 bounce_output l "Bounce Output"}
  bounce_output {{max(min(-((translate.x(frame-delay-max(lookahead,1))-(2*translate.x(frame-delay))+translate.x(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*x_mult,max_offset),-max_offset)} {max(min(-((translate.y(frame-delay-max(lookahead,1))-(2*translate.y(frame-delay))+translate.y(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*y_mult,max_offset),-max_offset)}}
- addUserKnob {26 bounce_output_text l "" T "<font color=#ffffff><b>Bounce Output Text:</b> X [value bounce_output.x] &nbsp;&nbsp; Y [value bounce_output.y]</font>"}
- addUserKnob {7 bounce_output_x l "Output X" R -500 500}
- bounce_output_x {{max(min(-((translate.x(frame-delay-max(lookahead,1))-(2*translate.x(frame-delay))+translate.x(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*x_mult,max_offset),-max_offset)}}
- addUserKnob {7 bounce_output_y l "Output Y" R -500 500}
- bounce_output_y {{max(min(-((translate.y(frame-delay-max(lookahead,1))-(2*translate.y(frame-delay))+translate.y(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*y_mult,max_offset),-max_offset)}}
- addUserKnob {41 bounce_output_link l "Output Link" T Bounce_Transform.translate}
  addUserKnob {26 ""}
  addUserKnob {41 filter T Bounce_Transform.filter}
  addUserKnob {41 motionblur T Bounce_Transform.motionblur}
