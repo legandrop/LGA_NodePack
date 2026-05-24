@@ -1,5 +1,5 @@
 Group {
- name ITransformU
+ name ITransformU_LGA
  tile_color 0xa57aaaff
  selected true
  addUserKnob {20 "" l Transform}
@@ -8,7 +8,7 @@ Group {
  addUserKnob {41 channels T IDistort2.channels}
  addUserKnob {6 blackOutside_1 l "Black Outside Before?" +STARTLINE}
  addUserKnob {41 matrix T Transform1.matrix}
- addUserKnob {41 translate T Transform1.translate}
+ addUserKnob {12 translate l translate}
  addUserKnob {41 rotate T Transform1.rotate}
  addUserKnob {41 scale T Transform1.scale}
  addUserKnob {41 skewX l "skew X" T Transform1.skewX}
@@ -21,7 +21,7 @@ Group {
  addUserKnob {6 cropToFormat l "Crop To Format" +STARTLINE}
  addUserKnob {6 blackOutside2 l "Black Outside After" -STARTLINE}
  addUserKnob {14 addPixels l "Add Pixels" R 0 100}
- addUserKnob {41 mix T Transform3.mix}
+ addUserKnob {41 mix T ITransformU_MapTransformMasked.mix}
 }
  Input {
   inputs 0
@@ -104,7 +104,7 @@ set Nb52e070 [stack 0]
  }
  TransformMasked {
   channels rgba
-  translate {{parent.Transform1.translate} {parent.Transform1.translate}}
+  translate {{parent.translate.x} {parent.translate.y}}
   rotate {{parent.Transform1.rotate}}
   scale {{parent.Transform1.scale} {parent.Transform1.scale}}
   skewX {{parent.Transform1.skewX}}
@@ -116,7 +116,7 @@ set Nb52e070 [stack 0]
   shutter {{parent.Transform1.shutter}}
   shutteroffset {{Transform1.shutteroffset}}
   shuttercustomoffset {{parent.Transform1.shuttercustomoffset}}
-  name Transform3
+  name ITransformU_MapTransformMasked
   xpos -320
   ypos -121
  }
@@ -175,7 +175,7 @@ push $Nb4fd6b0
 push $Nb4fd6b0
  TransformMasked {
   channels rgba
-  translate {{parent.Transform1.translate} {parent.Transform1.translate}}
+  translate {{parent.translate.x} {parent.translate.y}}
   rotate {{parent.Transform1.rotate}}
   scale {{parent.Transform1.scale} {parent.Transform1.scale}}
   skewX {{parent.Transform1.skewX}}
@@ -187,7 +187,7 @@ push $Nb4fd6b0
   shutter {{parent.Transform1.shutter}}
   shutteroffset {{Transform1.shutteroffset}}
   shuttercustomoffset {{parent.Transform1.shuttercustomoffset}}
-  name Transform2
+  name ITransformU_ImageTransformMasked
   xpos -446
   ypos -202
  }
@@ -298,6 +298,7 @@ push $Nb13fce0
  }
  Transform {
   inputs 0
+  translate {{parent.translate.x} {parent.translate.y}}
   center {1220 901}
   black_outside false
   name Transform1
