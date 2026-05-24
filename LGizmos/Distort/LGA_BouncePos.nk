@@ -21,8 +21,7 @@ Group {
  addUserKnob {7 max_offset l "Max Offset" t "Maximum generated offset in pixels for each axis. This clamps extreme bounce values so the result cannot jump too far." R 0 500}
  max_offset 100
  addUserKnob {26 ""}
- addUserKnob {12 bounce_output l "Bounce Offset" t "Calculated bounce offset in pixels, derived from Source Translate and the settings."}
- bounce_output {{max(min(-((translate.x(frame-delay-max(lookahead,1))-(2*translate.x(frame-delay))+translate.x(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*x_mult,max_offset),-max_offset)} {max(min(-((translate.y(frame-delay-max(lookahead,1))-(2*translate.y(frame-delay))+translate.y(frame-delay+max(lookahead,1)))/(max(lookahead,1)*max(lookahead,1)))*amount*y_mult,max_offset),-max_offset)}}
+ addUserKnob {41 bounce_offset l "Bounce Offset" t "Calculated bounce offset in pixels, based on Source Translate and the current bounce controls." T Bounce_Output.bounce_offset}
  addUserKnob {26 ""}
  addUserKnob {41 filter T Bounce_Transform.filter}
  addUserKnob {41 motionblur T Bounce_Transform.motionblur}
@@ -44,6 +43,15 @@ Group {
   label "output: [value translate.x], [value translate.y]"
   xpos 0
   ypos 80
+ }
+ NoOp {
+  inputs 0
+  name Bounce_Output
+  xpos 140
+  ypos 80
+  addUserKnob {20 User}
+  addUserKnob {12 bounce_offset l "Bounce Offset"}
+  bounce_offset {{Bounce_Transform.translate.x} {Bounce_Transform.translate.y}}
  }
  Output {
   name Output1
