@@ -3,7 +3,7 @@ version 15.1 v6
 push $cut_paste_input
 Group {
  name LGA_BouncePos
- tile_color 0xa57aaaff
+ tile_color 0xb15bbbff
  selected true
  addUserKnob {20 BouncePos}
  addUserKnob {26 source_note l "" T "<span style=\"color:#979797\">Bounce is calculated from this translate motion.<br/>Animate it here, or link it from a another Transform.</span><br/><span style=\"font-size:4px\">&nbsp;</span>"}
