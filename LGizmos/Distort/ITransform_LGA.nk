@@ -1,5 +1,5 @@
 Group {
- name ITransformU_LGA
+ name ITransform_LGA
  tile_color 0xa57aaaff
  selected true
  addUserKnob {20 "" l Transform}
@@ -20,7 +20,7 @@ Group {
  addUserKnob {41 motionblur T Transform1.motionblur}
  addUserKnob {41 shutter T Transform1.shutter}
  addUserKnob {41 shutteroffset T Transform1.shutteroffset}
- addUserKnob {41 shuttercustomoffset T Transform1.shuttercustomoffset}
+ addUserKnob {41 offset T Transform1.shuttercustomoffset}
  addUserKnob {26 ""}
  addUserKnob {6 cropToFormat l "Crop To Format" +STARTLINE}
  addUserKnob {6 blackOutside2 l "Black Outside After" -STARTLINE}
