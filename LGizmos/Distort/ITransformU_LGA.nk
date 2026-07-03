@@ -17,6 +17,10 @@ Group {
  addUserKnob {22 setCenter l "Set Center" -STARTLINE T "n = nuke.thisGroup()\nw= n.width()\nh=n.height()\nn\['center'].setValue(\[w/2,h/2])"}
  addUserKnob {41 filter_1 l filter T IDistort2.filter}
  addUserKnob {41 clamp T Transform1.clamp}
+ addUserKnob {41 motionblur T Transform1.motionblur}
+ addUserKnob {41 shutter T Transform1.shutter}
+ addUserKnob {41 shutteroffset T Transform1.shutteroffset}
+ addUserKnob {41 shuttercustomoffset T Transform1.shuttercustomoffset}
  addUserKnob {26 ""}
  addUserKnob {6 cropToFormat l "Crop To Format" +STARTLINE}
  addUserKnob {6 blackOutside2 l "Black Outside After" -STARTLINE}
