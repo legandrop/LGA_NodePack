@@ -7,8 +7,7 @@ Group {
  AdjBBox1_numpixels 1024
  addUserKnob {41 channels T IDistort2.channels}
  addUserKnob {6 blackOutside_1 l "Black Outside Before?" +STARTLINE}
- addUserKnob {41 matrix T Transform1.matrix}
- addUserKnob {12 translate l translate}
+ addUserKnob {41 translate T Transform1.translate}
  addUserKnob {41 rotate T Transform1.rotate}
  addUserKnob {41 scale T Transform1.scale}
  addUserKnob {41 skewX l "skew X" T Transform1.skewX}
@@ -19,13 +18,13 @@ Group {
  addUserKnob {41 clamp T Transform1.clamp}
  addUserKnob {41 motionblur T Transform1.motionblur}
  addUserKnob {41 shutter T Transform1.shutter}
- addUserKnob {41 shutteroffset T Transform1.shutteroffset}
- addUserKnob {41 offset T Transform1.shuttercustomoffset}
+ addUserKnob {41 shutteroffset l "shutter offset" T Transform1.shutteroffset}
+ addUserKnob {41 offset l "" -STARTLINE T Transform1.shuttercustomoffset}
  addUserKnob {26 ""}
  addUserKnob {6 cropToFormat l "Crop To Format" +STARTLINE}
  addUserKnob {6 blackOutside2 l "Black Outside After" -STARTLINE}
  addUserKnob {14 addPixels l "Add Pixels" R 0 100}
- addUserKnob {41 mix T ITransformU_MapTransformMasked.mix}
+ addUserKnob {41 mix T Transform1.mix}
 }
  Input {
   inputs 0
@@ -106,21 +105,11 @@ set Nb52e070 [stack 0]
   xpos -286
   ypos -172
  }
- TransformMasked {
+ Transform {
   channels rgba
-  translate {{parent.translate.x} {parent.translate.y}}
-  rotate {{parent.Transform1.rotate}}
-  scale {{parent.Transform1.scale} {parent.Transform1.scale}}
-  skewX {{parent.Transform1.skewX}}
-  skewY {{parent.Transform1.skewY}}
-  skew_order {{Transform1.skew_order}}
-  center {{parent.Transform1.center} {parent.Transform1.center}}
-  filter {{Transform1.filter}}
-  motionblur {{parent.Transform1.motionblur}}
-  shutter {{parent.Transform1.shutter}}
-  shutteroffset {{Transform1.shutteroffset}}
-  shuttercustomoffset {{parent.Transform1.shuttercustomoffset}}
-  name ITransformU_MapTransformMasked
+  center {1220 901}
+  black_outside false
+  name Transform1
   xpos -320
   ypos -121
  }
@@ -179,7 +168,7 @@ push $Nb4fd6b0
 push $Nb4fd6b0
  TransformMasked {
   channels rgba
-  translate {{parent.translate.x} {parent.translate.y}}
+  translate {{parent.Transform1.translate.x} {parent.Transform1.translate.y}}
   rotate {{parent.Transform1.rotate}}
   scale {{parent.Transform1.scale} {parent.Transform1.scale}}
   skewX {{parent.Transform1.skewX}}
@@ -264,7 +253,6 @@ push $Nb13fce0
  IDistort {
   uv forward
   name IDistort2
-  selected true
   xpos -210
   ypos 187
  }
@@ -299,15 +287,5 @@ push $Nb13fce0
   name Output1
   xpos -210
   ypos 634
- }
- Transform {
-  inputs 0
-  translate {{parent.translate.x} {parent.translate.y}}
-  center {1220 901}
-  black_outside false
-  name Transform1
-  label "expresison link this\nto avoid st map overlay"
-  xpos 51
-  ypos -201
  }
 end_group
