@@ -3,19 +3,18 @@ Group {
  tile_color 0xa57aaaff
  selected true
  addUserKnob {20 "" l Transform}
- addUserKnob {14 AdjBBox1_numpixels l "Add Pixels" +INVISIBLE R 0 100}
- AdjBBox1_numpixels 1024
- addUserKnob {41 channels T IDistort2.channels}
+ addUserKnob {41 channels T STMap.channels}
  addUserKnob {6 blackOutside_1 l "Black Outside Before?" +STARTLINE}
  addUserKnob {41 translate T Transform1.translate}
  addUserKnob {41 rotate T Transform1.rotate}
  addUserKnob {41 scale T Transform1.scale}
  addUserKnob {41 skewX l "skew X" T Transform1.skewX}
  addUserKnob {41 skewY l "skew Y" T Transform1.skewY}
+ addUserKnob {41 skew_order l "skew order" T Transform1.skew_order}
  addUserKnob {41 center T Transform1.center}
  addUserKnob {22 setCenter l "Set Center" -STARTLINE T "n = nuke.thisGroup()\nw= n.width()\nh=n.height()\nn\['center'].setValue(\[w/2,h/2])"}
- addUserKnob {41 filter_1 l filter T IDistort2.filter}
- addUserKnob {41 clamp T Transform1.clamp}
+ addUserKnob {41 filter_1 l filter T MapTransform.filter}
+ addUserKnob {41 clamp -STARTLINE T MapTransform.clamp}
  addUserKnob {41 motionblur T Transform1.motionblur}
  addUserKnob {41 shutter T Transform1.shutter}
  addUserKnob {41 shutteroffset l "shutter offset" T Transform1.shutteroffset}
@@ -24,268 +23,153 @@ Group {
  addUserKnob {6 cropToFormat l "Crop To Format" +STARTLINE}
  addUserKnob {6 blackOutside2 l "Black Outside After" -STARTLINE}
  addUserKnob {14 addPixels l "Add Pixels" R 0 100}
- addUserKnob {41 mix T Transform1.mix}
+ addUserKnob {7 mix}
+ mix 1
 }
  Input {
   inputs 0
   name ctrlMask
-  xpos -40
-  ypos -338
+  xpos 606
+  ypos 531
   number 1
  }
-set Nb4dbd80 [stack 0]
- Shuffle {
-  red alpha
-  green alpha
-  blue alpha
-  alpha black
-  name Shuffle1
-  xpos -40
-  ypos -25
+set NmaskInput [stack 0]
+ NoOp {
+  name MaskBBox
+  xpos 606
+  ypos 555
+  addUserKnob {20 User}
+  addUserKnob {15 bbox}
+  bbox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
  }
-set Nb4e0070 [stack 0]
+ Expression {
+  temp_name0 alpha_mask
+  temp_expr0 a
+  expr0 alpha_mask
+  expr1 alpha_mask
+  expr2 alpha_mask
+  expr3 alpha_mask
+  name Mask
+  xpos 606
+  ypos 579
+ }
+set Nmask [stack 0]
  Input {
   inputs 0
   name img
-  xpos -517
-  ypos -411
+  xpos 121
+  ypos 344
  }
  BlackOutside {
   name BlackOutside1
-  xpos -517
-  ypos -357
+  xpos 121
+  ypos 370
   disable {{!parent.blackOutside_1}}
  }
- Dot {
-  name Dot5
-  note_font_size 41
-  xpos -483
-  ypos -294
- }
-set Nb4fd6b0 [stack 0]
- Remove {
-  name Remove1
-  xpos -210
-  ypos -304
- }
-set Nb502b80 [stack 0]
-push $Nb4dbd80
- Merge2 {
-  inputs 2
-  Achannels {-rgba.red -rgba.green -rgba.blue -rgba.alpha}
-  Bchannels {-rgba.red -rgba.green -rgba.blue -rgba.alpha}
-  output {-rgba.red -rgba.green -rgba.blue -rgba.alpha}
-  name Merge3
-  xpos -111
-  ypos -258
- }
- AdjBBox {
-  numpixels {{parent.AdjBBox1_numpixels}}
-  name AdjBBox1
-  xpos -111
-  ypos -232
- }
-push $Nb502b80
- CopyBBox {
-  inputs 2
-  name CopyBBox2
-  xpos -210
-  ypos -232
+set Nimg [stack 0]
+ Crop {
+  box {{-input.format.width} {-input.format.height} {input.format.width*2} {input.format.height*2}}
+  crop false
+  name CropOverscan
+  xpos 474
+  ypos 370
+  addUserKnob {20 User}
+  addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
  }
  Expression {
-  expr0 x
-  expr1 y
-  name Expression1
-  xpos -210
-  ypos -176
+  expr0 (x+0.5)/width
+  expr1 (y+0.5)/height
+  name UV
+  xpos 474
+  ypos 418
  }
-set Nb52e070 [stack 0]
+set Nuv [stack 0]
  Dot {
-  name Dot2
-  xpos -286
-  ypos -172
+  name DotUV
+  xpos 343
+  ypos 421
  }
+push $Nmask
+push $Nuv
  Transform {
-  channels rgba
-  center {1220 901}
-  black_outside false
-  name Transform1
-  xpos -320
-  ypos -121
- }
-push $Nb52e070
- Merge2 {
-  inputs 2
-  operation minus
-  bbox B
-  name Merge1
-  xpos -210
-  ypos -121
- }
- Merge2 {
-  inputs 2
-  operation multiply
-  bbox B
-  name Merge2
-  xpos -210
-  ypos -25
- }
-set Nb564c80 [stack 0]
- Dot {
-  name Dot1
-  xpos -270
-  ypos -21
- }
- Dot {
-  name Dot3
-  xpos -270
-  ypos 423
- }
-push $Nb4fd6b0
- Dot {
-  name Dot4
-  xpos -483
-  ypos 46
- }
-set Nb57e7a0 [stack 0]
- Copy {
-  inputs 2
-  from0 rgba.red
-  to0 rgba.red
-  from1 rgba.green
-  to1 rgba.green
-  name Copy2
-  xpos -517
-  ypos 407
- }
- IDistort {
-  channels none
-  name IDistort1
-  xpos -517
-  ypos 457
- }
-push $Nb4fd6b0
-push $Nb4fd6b0
- TransformMasked {
-  channels rgba
-  translate {{parent.Transform1.translate.x} {parent.Transform1.translate.y}}
+  translate {{parent.Transform1.translate} {parent.Transform1.translate}}
   rotate {{parent.Transform1.rotate}}
   scale {{parent.Transform1.scale} {parent.Transform1.scale}}
   skewX {{parent.Transform1.skewX}}
   skewY {{parent.Transform1.skewY}}
-  skew_order {{Transform1.skew_order}}
+  skew_order {{parent.Transform1.skew_order}}
   center {{parent.Transform1.center} {parent.Transform1.center}}
-  filter {{Transform1.filter}}
   motionblur {{parent.Transform1.motionblur}}
   shutter {{parent.Transform1.shutter}}
-  shutteroffset {{Transform1.shutteroffset}}
+  shutteroffset {{parent.Transform1.shutteroffset}}
   shuttercustomoffset {{parent.Transform1.shuttercustomoffset}}
-  name ITransformU_ImageTransformMasked
-  xpos -446
-  ypos -202
+  name MapTransform
+  xpos 599
+  ypos 418
  }
- Merge2 {
+push $Nuv
+ Keymix {
+  inputs 3
+  name MaskMix
+  xpos 474
+  ypos 525
+ }
+ Expression {
+  expr0 ((x+0.5)/width)
+  expr1 ((y+0.5)/height)
+  mix {{1-parent.mix}}
+  name MixUV
+  xpos 309
+  ypos 563
+ }
+push $Nimg
+ NoOp {
+  name InputBBox
+  xpos 126
+  ypos 723
+  addUserKnob {20 User}
+  addUserKnob {15 bbox}
+  bbox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+ }
+ STMap {
   inputs 2
-  name Merge4
-  label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
-  xpos -446
-  ypos -123
+  channels rgba
+  uv rgb
+  name STMap
+  xpos 309
+  ypos 723
  }
  Crop {
-  box {0 0 {input.width} {input.height}}
+  box {{"InputBBox.bbox<MaskBBox.bbox?InputBBox.bbox-addPixels:InputBBox.bbox+(MaskBBox.bbox-InputBBox.bbox)-addPixels"} {"InputBBox.bbox<MaskBBox.bbox?InputBBox.bbox-addPixels:InputBBox.bbox+(MaskBBox.bbox-InputBBox.bbox)-addPixels"} {"InputBBox.bbox>MaskBBox.bbox?InputBBox.bbox+addPixels:InputBBox.bbox+(MaskBBox.bbox-InputBBox.bbox)+addPixels"} {"InputBBox.bbox>MaskBBox.bbox?InputBBox.bbox+addPixels:InputBBox.bbox+(MaskBBox.bbox-InputBBox.bbox)+addPixels"}}
   name Crop1
-  xpos -446
-  ypos 182
-  disable {{!parent.cropToFormat}}
+  xpos 309
+  ypos 747
   addUserKnob {20 User}
   addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
  }
- AdjBBox {
-  numpixels {{parent.addPixels} {parent.addPixels}}
-  name AdjBBox3
-  xpos -446
-  ypos 208
- }
- Dot {
-  name Dot6
-  note_font_size 41
-  xpos -412
-  ypos 364
- }
-push $Nb4e0070
-push $Nb564c80
-push $Nb57e7a0
- Copy {
-  inputs 2
-  from0 rgba.red
-  to0 forward.u
-  from1 rgba.green
-  to1 forward.v
-  bbox A
-  name Copy1
-  xpos -210
-  ypos 30
- }
-set Nb13fce0 [stack 0]
- Merge2 {
-  inputs 2
-  Achannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
-  Bchannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
-  output {-rgba.red -rgba.green -rgba.blue rgba.alpha}
-  name Merge5
-  label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
-  xpos -40
-  ypos 108
- }
-push $Nb13fce0
- CopyBBox {
-  inputs 2
-  name CopyBBox1
-  xpos -210
-  ypos 114
- }
- AdjBBox {
-  numpixels {{parent.addPixels} {parent.addPixels}}
-  name AdjBBox2
-  xpos -210
-  ypos 140
- }
- IDistort {
-  uv forward
-  name IDistort2
-  xpos -210
-  ypos 187
- }
- CopyBBox {
-  inputs 2
-  name CopyBBox3
-  xpos -210
-  ypos 360
- }
- Remove {
-  channels none
-  name Remove2
-  xpos -210
-  ypos 419
- }
- Copy {
-  inputs 2
-  from0 -rgba.alpha
-  to0 -rgba.alpha
-  bbox B
-  name Copy3
-  xpos -210
-  ypos 457
+ Reformat {
+  name Reformat1
+  xpos 309
+  ypos 771
+  disable {{!parent.cropToFormat}}
  }
  BlackOutside {
   name BlackOutside2
-  xpos -210
-  ypos 538
+  xpos 309
+  ypos 797
   disable {{!parent.blackOutside2}}
  }
  Output {
   name Output1
-  xpos -210
-  ypos 634
+  xpos 309
+  ypos 823
+ }
+ Transform {
+  inputs 0
+  center {1220 901}
+  black_outside false
+  name Transform1
+  xpos 715
+  ypos 417
  }
 end_group
