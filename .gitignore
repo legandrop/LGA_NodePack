@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+.codex/
+.cursor/
+.cursorrules
++Building_Blocks/
