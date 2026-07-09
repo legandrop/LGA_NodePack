@@ -35,10 +35,7 @@ impulse_weight 1
 addUserKnob {7 max_offset l "Max Offset" t "Maximum generated offset in pixels for each axis. This clamps extreme bounce values so the result cannot jump too far." R 0 500}
 max_offset 100
 addUserKnob {26 ""}
-addUserKnob {41 filter T Bounce_Transform.filter}
-addUserKnob {41 motionblur T Bounce_Transform.motionblur}
-addUserKnob {41 shutter T Bounce_Transform.shutter}
-addUserKnob {26 about l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>LGA_BouncePos v0.82</b> - position bounce from source translate acceleration.</span>"}
+addUserKnob {26 about l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>LGA_BouncePos v0.83</b> - position bounce from source translate acceleration.</span>"}
 }
 Input {
 inputs 0
