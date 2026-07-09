@@ -18,6 +18,12 @@ addUserKnob {7 y_mult l "Y Mult" t "Multiplier for the generated vertical bounce
 y_mult 1
 addUserKnob {26 "" +STARTLINE}
 addUserKnob {7 delay l Delay t "Base delay in frames. Positive values make the bounce use earlier source motion; negative values make it anticipate later motion." R -10 10}
+addUserKnob {7 delay_random_amount l "Delay Random Amount" t "Maximum random delay variation in frames. 0 disables delay randomization." R 0 10}
+addUserKnob {7 delay_random_frequency l "Delay Random Frequency" t "Speed of the smooth delay variation. Higher values change the random delay faster." R 0 1}
+delay_random_frequency 0.05
+addUserKnob {3 delay_random_seed l "Delay Random Seed" t "Seed for the delay variation. Use different seeds to make matching setups drift differently."}
+delay_random_seed 1
+addUserKnob {41 effective_delay l "Effective Delay" t "Current delay after adding smooth random variation." T Delay_Output.effective_delay}
 addUserKnob {26 "" +STARTLINE}
 addUserKnob {7 bounce_length l "Bounce Length" t "Extra bounce tail length in frames. 0 keeps the original one-frame acceleration response; higher values add a longer oscillating release." R 0 15}
 addUserKnob {7 bounce_decay l "Bounce Decay" t "How quickly the extra bounce tail fades out. 0 keeps more energy; 1 kills the tail almost immediately."}
@@ -36,7 +42,7 @@ addUserKnob {7 max_offset l "Max Offset" t "Maximum generated offset in pixels f
 max_offset 100
 addUserKnob {26 ""}
 addUserKnob {41 bounce_offset l "Bounce Offset" t "Calculated bounce offset in pixels (after Bounce Smooth). Copy this knob and paste a link onto another node to drive it with the bounce." T Bounce_Output.bounce_offset}
-addUserKnob {26 about l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>LGA_BouncePos v0.85</b> - position bounce from source translate acceleration.</span>"}
+addUserKnob {26 about l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>LGA_BouncePos v0.9</b><br/>position bounce from source translate acceleration.</span>"}
 }
 Input {
 inputs 0
@@ -54,6 +60,15 @@ disable {{parent.disable}}
 }
 NoOp {
 inputs 0
+name Delay_Output
+xpos 140
+ypos -40
+addUserKnob {20 User}
+addUserKnob {7 effective_delay l "Effective Delay"}
+effective_delay {{parent.delay+(parent.delay_random_amount*noise((frame+parent.delay_random_seed)*parent.delay_random_frequency))}}
+}
+NoOp {
+inputs 0
 name Bounce_Raw
 xpos 140
 ypos 20
@@ -68,7 +83,7 @@ xpos 300
 ypos 20
 addUserKnob {20 User}
 addUserKnob {12 g l "Gated Impulse" t "Per-frame gated acceleration impulse of the source translate (second difference), WITHOUT amount/mult - those are applied downstream in Bounce_Raw at the current frame. Sampled at frame-k to build the bounce tail cheaply."}
-g {{(-((parent.translate.x(frame-parent.delay-max(parent.lookahead,1))-(2*parent.translate.x(frame-parent.delay))+parent.translate.x(frame-parent.delay+max(parent.lookahead,1)))/(max(parent.lookahead,1)*max(parent.lookahead,1))))*((!parent.ignore_start_frame)||((frame-parent.delay-max(parent.lookahead,1))>=parent.start_frame))*parent.impulse_weight(frame)} {(-((parent.translate.y(frame-parent.delay-max(parent.lookahead,1))-(2*parent.translate.y(frame-parent.delay))+parent.translate.y(frame-parent.delay+max(parent.lookahead,1)))/(max(parent.lookahead,1)*max(parent.lookahead,1))))*((!parent.ignore_start_frame)||((frame-parent.delay-max(parent.lookahead,1))>=parent.start_frame))*parent.impulse_weight(frame)}}
+g {{(-((parent.translate.x(frame-Delay_Output.effective_delay(frame)-max(parent.lookahead,1))-(2*parent.translate.x(frame-Delay_Output.effective_delay(frame)))+parent.translate.x(frame-Delay_Output.effective_delay(frame)+max(parent.lookahead,1)))/(max(parent.lookahead,1)*max(parent.lookahead,1))))*((!parent.ignore_start_frame)||((frame-Delay_Output.effective_delay(frame)-max(parent.lookahead,1))>=parent.start_frame))*parent.impulse_weight(frame)} {(-((parent.translate.y(frame-Delay_Output.effective_delay(frame)-max(parent.lookahead,1))-(2*parent.translate.y(frame-Delay_Output.effective_delay(frame)))+parent.translate.y(frame-Delay_Output.effective_delay(frame)+max(parent.lookahead,1)))/(max(parent.lookahead,1)*max(parent.lookahead,1))))*((!parent.ignore_start_frame)||((frame-Delay_Output.effective_delay(frame)-max(parent.lookahead,1))>=parent.start_frame))*parent.impulse_weight(frame)}}
 }
 NoOp {
 inputs 0
