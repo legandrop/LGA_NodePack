@@ -40,3 +40,14 @@
 # segunda pasada: una auditoria encontro que el criterio estaba escrito pero no
 # aplicado parejo, y estos arboles se habian normalizado igual.
 pixelfudger3/** -text
+
+# LGizmos es una coleccion de gizmos de TERCEROS -el AGENTS.md describe a
+# NodePack como "gizmos, toolsets y subpacks de terceros"-: 139 de 152 archivos
+# no llevan el prefijo LGA_ y vienen de autores distintos (KF_, aeDirtCG, MMO_,
+# GS_...). No los editamos, no los mergeamos y no ganamos nada normalizandolos;
+# si alguna vez se re-baja uno actualizado, el diff tiene que ser el del gizmo y
+# no el de los finales de linea.
+#
+# Los LGA_* de adentro SI son nuestros y siguen la politica normal.
+LGizmos/** -text
+LGizmos/**/LGA_* text eol=lf
