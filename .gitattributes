@@ -86,6 +86,12 @@ pixelfudger3/** -text
 # si alguna vez se re-baja uno actualizado, el diff tiene que ser el del gizmo y
 # no el de los finales de linea.
 #
-# Los LGA_* de adentro SI son nuestros y siguen la politica normal.
+# Los LGA_* de adentro SI son nuestros y siguen la politica normal. Se
+# acotan por extension: `LGizmos/**/LGA_*` a secas gana como ultimo patron
+# y le sacaria el `binary` a un `LGA_algo.png` que caiga ahi adentro.
 LGizmos/** -text
-LGizmos/**/LGA_* text eol=lf
+LGizmos/**/LGA_*.nk text eol=lf
+LGizmos/**/LGA_*.gizmo text eol=lf
+LGizmos/**/LGA_*.py text eol=lf
+LGizmos/**/LGA_*.md text eol=lf
+LGizmos/**/LGA_*.txt text eol=lf
