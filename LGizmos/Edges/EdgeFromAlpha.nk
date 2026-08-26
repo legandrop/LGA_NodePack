@@ -115,7 +115,7 @@ push $N1e7d31e0
  }
  Switch {
   inputs 2
-  which {{"parent.output == red"}}
+  which {{"parent.output == 1" i}}
   name Switch1
   xpos -191
   ypos 456
