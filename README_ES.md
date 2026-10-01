@@ -1,3 +1,5 @@
+<p align="right"><a href="README.md">English</a> · <b>Español</b></p>
+
 <p>
   <span style="font-size:1.6em;font-weight:700;line-height:1;">LGA NODE PACK</span><br>
   <span style="font-style:italic;line-height:1;">Lega | v1.48</span><br>

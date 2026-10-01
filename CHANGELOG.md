@@ -1,6 +1,7 @@
 # Changelog
 
 ## v1.49
+- La página del repo mostraba el README en castellano y el inglés quedaba escondido en `README_EN.md`. Ahora `README.md` es el inglés y el castellano pasa a `README_ES.md` (antes `README.MD`), renombrados con historia. Los dos arrancan con un selector de idioma que enlaza al otro, así que mantienen el mismo esqueleto línea por línea; el resto del contenido no cambia. [ NodePack - El README de GitHub pasa a estar en ingles ]
 - EdgeFromAlpha: el Switch interno tenia `which {{"parent.output == red"}}`, y `parent.output` es un link al channel knob de `ChannelMerge4`, que en una expresion se evalua como numero. `red` no es ningun nombre valido, asi que Nuke tiraba `Nothing is named "red"` cada vez que se abria un comp con el nodo y el switch quedaba clavado en 0. La copia de este repo venia de un `.nk` de Nuke 6.1 donde el parser todavia aceptaba el nombre de canal suelto; la version original del NukeSurvivalToolkit ya usa el indice. Se alinea a `{{"parent.output == 1" i}}`. Los comps ya guardados no se arreglan solos: el gizmo entra por `loadToolset`, que pega una copia expandida del grupo, asi que cada script viejo conserva la expresion rota. [ NodePack - Corregir la expresion del Switch de EdgeFromAlpha ]
 
 ## v1.48
