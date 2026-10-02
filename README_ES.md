@@ -5,6 +5,8 @@
   <span style="font-style:italic;line-height:1;">Lega | v1.48</span><br>
 </p>
 
+**Novedades:** [Releases](https://github.com/legandrop/LGA_NodePack/releases)
+
 **LGA Node Pack** es una coleccion simple de nodos para Nuke: gizmos,
 groups y toolsets reunidos en un solo lugar para tenerlos disponibles desde el
 menu **Nodes**.
@@ -54,8 +56,7 @@ Estructura esperada:
 
 El pack agrega menus al panel **Nodes**:
 
-- **LGizmos**: la coleccion principal, organizada por categorias. Al final,
-  **What's new** muestra que cambio en cada version del pack.
+- **LGizmos**: la coleccion principal, organizada por categorias.
 - **Pixelfudger3**: pack original de Xavier Bourque, con menu propio.
 - **Spin Tools**: set de gizmos creado por el estudio SPIN VFX
   Keying.

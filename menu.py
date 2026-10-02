@@ -68,9 +68,9 @@ def load_files_in_directory(directory, menu):
 nodes_menu = nuke.menu("Nodes")
 
 # Obtener todas las subcarpetas dentro del directorio del script actual y ordenarlas alfabeticamente.
-# Sin __pycache__ ni carpetas ocultas: importar LGA_NodePack_WhatsNew, que vive
-# en la raiz, crea un __pycache__ aca, y sin este filtro aparecia como un menu
-# vacio en la barra de nodos al arrancar Nuke la vez siguiente.
+# Sin __pycache__ ni carpetas ocultas (.git en un clon): un modulo Python en la
+# raiz crea un __pycache__ aca, y sin este filtro aparecia como un menu vacio
+# en la barra de nodos al arrancar Nuke la vez siguiente.
 subfolders = [
     os.path.join(SCRIPT_DIR, d)
     for d in sorted(os.listdir(SCRIPT_DIR), key=lambda x: x.lower())
@@ -80,7 +80,6 @@ subfolders = [
 ]
 
 # Crear menus para cada subcarpeta que no contenga *init*.py o menu.py
-folder_menus = {}
 for folder in subfolders:
     menu_name = os.path.basename(folder)
     if not os.path.exists(os.path.join(folder, "menu.py")) and not any(
@@ -91,22 +90,5 @@ for folder in subfolders:
         )
         load_files_in_directory(folder, sub_menu)
         nuke.pluginAddPath(folder)
-        folder_menus[menu_name] = sub_menu
     else:
         nuke.pluginAddPath(folder)
-
-
-# NodePack no tiene menu propio en la barra de Nuke: What's new va al final de
-# LGizmos, que es el menu del pack en la barra de nodos.
-def _whats_new_runner():
-    # El modulo se importa recien al hacer click: las notas no se leen al
-    # arrancar Nuke, solo cuando el usuario las pide. Vive en la raiz del
-    # pack, que ya esta en el plugin path.
-    import LGA_NodePack_WhatsNew
-
-    LGA_NodePack_WhatsNew.show_whats_new()
-
-
-if "LGizmos" in folder_menus:
-    folder_menus["LGizmos"].addSeparator()
-    folder_menus["LGizmos"].addCommand("What's new", _whats_new_runner)
