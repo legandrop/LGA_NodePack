@@ -54,7 +54,8 @@ Expected structure:
 
 The pack adds menus to the **Nodes** panel:
 
-- **LGizmos**: the main collection, organized by category.
+- **LGizmos**: the main collection, organized by category. At the bottom,
+  **What's new** shows what changed in each version of the pack.
 - **Pixelfudger3**: the original pack by Xavier Bourque, with its own menu.
 - **Spin Tools**: a set of gizmos made by the SPIN VFX studio
   Keying.
