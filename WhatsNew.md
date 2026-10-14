@@ -11,4 +11,5 @@ platforms: [win, mac]
 ## Unreleased
 
 ## v1.49
+- [new] LGA_LightFromPlate, in LGizmos > ColorGrading, gives a render the lighting of the original plate while keeping the render's detail; it works on the whole frame with just the render and the plate, or inside optional masks, and can composite the result over the plate.
 - [fixed] EdgeFromAlpha no longer throws a "Nothing is named red" error when you add it to a comp; comps saved earlier keep the old error until you replace the node with a fresh copy.

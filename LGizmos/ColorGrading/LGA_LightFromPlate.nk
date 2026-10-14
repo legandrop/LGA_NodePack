@@ -1,0 +1,787 @@
+set cut_paste_input [stack 0]
+version 17.0 v4
+push $cut_paste_input
+Group {
+ name LGA_LightFromPlate1
+ tile_color 0xd9a441ff
+ selected true
+ addUserKnob {20 LightFromPlate}
+ addUserKnob {26 div_light l "" +STARTLINE T "<b>Light from Plate</b>"}
+ addUserKnob {7 amount l Amount t "Cantidad de Light from Plate. 1 = la luz de baja frecuencia del Plate con el detalle del render (arrugas). 0 = dentro de la piel vuelve el detalle del Plate. Mas de 1 exagera el detalle del render. Valor habitual: 1.0." R 0 2}
+ amount 1
+ addUserKnob {7 cutoff l "Cutoff (% head width)" t "Corte entre luz y detalle, en % del ancho de cabeza (se acota entre 0.25 y 16). sigma = Head width x Cutoff / 100. Valor habitual: 2.0." R 0.25 16}
+ cutoff 2
+ addUserKnob {7 head_width l "Head width (px)" t "Ancho de la cabeza en pixeles, medido por cuadro sobre un matte de cabeza (primera a ultima columna con matte mayor que 0.5). Se puede escribir, animar o medir con el boton." R 0 4000}
+ head_width 1000
+ addUserKnob {7 sigma l "Sigma (px)" t "Sigma en pixeles que resulta de Head width y Cutoff (solo lectura)." +DISABLED R 0 200}
+ sigma {{"max(1, head_width * clamp(cutoff, 0.25, 16) / 100)"}}
+ addUserKnob {4 measure_from l "Measure from" t "De que entrada sale el matte de cabeza que se mide: matte, skin o area. Usa el mismo canal elegido para esa entrada." M {matte skin area}}
+ addUserKnob {3 measure_first l Range t "Primer y ultimo cuadro a medir."}
+ measure_first {{root.first_frame}}
+ addUserKnob {3 measure_last l "" t "Primer y ultimo cuadro a medir." -STARTLINE}
+ measure_last {{root.last_frame}}
+ addUserKnob {22 measure l "Measure head width" t "Mide el ancho del matte elegido (umbral 0.5) en cada cuadro del rango y lo deja animado en Head width. El resultado queda escrito al lado del boton. Si el matte esta vacio en todo el rango (por ejemplo, el canal elegido no tiene datos) no cambia Head width y lo avisa ahi mismo." T "def _lga_lfp_medir():\n    # El CurveTool se crea solo mientras dura la medicion: uno permanente dentro del grupo imprime un aviso de Nuke\n    # (Setting knob values from validate) cada vez que algo lo valida.\n    n = nuke.thisNode()\n    st = n.knob('measure_status')\n    first, last = int(n.knob('measure_first').value()), int(n.knob('measure_last').value())\n    if last < first:\n        first, last = last, first\n    i = int(n.knob('measure_from').getValue())\n    src = ('matte', 'skin', 'area')\[i]\n    if n.input((4, 2, 3)\[i]) is None:\n        st.setValue('not measured: the %s input is not connected' % src)\n    else:\n        anchos = None\n        with n:\n            mb = nuke.toNode('Measure_bin')\n            ct = nuke.nodes.CurveTool(name='HeadMeasure_tmp', inputs=(mb,))\n        try:\n            ct.knob('operation').setValue('Auto Crop')\n            ct.knob('ROI').setValue((0, 0, mb.width(), mb.height()))\n            nuke.execute(ct, first, last, 1)\n            d = ct.knob('autocropdata')\n            anchos, vacios = \[], 0\n            for f in range(first, last + 1):\n                w = d.getValueAt(f, 2) - d.getValueAt(f, 0) - 1\n                vacio = d.getValueAt(f, 3) - d.getValueAt(f, 1) <= 0 or w < 0\n                vacios += vacio\n                anchos.append(0 if vacio else w)\n        except Exception as e:\n            st.setValue('not measured: %s' % e)\n        finally:\n            nuke.delete(ct)\n        if anchos is not None and vacios == len(anchos):\n            st.setValue('not measured: the %s input is empty in frames %d-%d (nothing above 0.5 in the chosen channel); Head width was not changed' % (src, first, last))\n        elif anchos is not None:\n            k = n.knob('head_width')\n            k.clearAnimated()\n            k.setAnimated()\n            for f, w in zip(range(first, last + 1), anchos):\n                k.setValueAt(w, f)\n            msg = 'measured frames %d-%d from the %s input' % (first, last, src)\n            if vacios:\n                msg += ' (%d frames with an empty matte set to 0)' % vacios\n            st.setValue(msg)\n_lga_lfp_medir()\ndel _lga_lfp_medir\n" +STARTLINE}
+ addUserKnob {26 measure_status l "" +STARTLINE T " "}
+ addUserKnob {26 line_masks l "" +STARTLINE}
+ addUserKnob {26 div_masks l "" +STARTLINE T "<b>Masks (optional)</b>"}
+ addUserKnob {4 skin_from l "Skin mask from" t "De donde sale la mascara opcional que limita el efecto (se binariza en 0.5): el alfa o el rojo de la entrada skin, o el alfa del render. Un PNG gris entra por red: si se elige alpha y la entrada no tiene canal alfa, se usa red. Con render alpha y un render sin alfa no hay mascara. Con alpha o red y la entrada skin sin conectar tampoco: la luz se mide y se aplica en todo el cuadro." M {alpha red "render alpha"}}
+ addUserKnob {4 area_from l "Area mask from" t "Canal de la entrada area, opcional: zona donde se aplica el resultado (se binariza en 0.5 y se une con la mascara skin). Sin conectar, la zona es la misma mascara skin. Un PNG gris entra por red: si se elige alpha y la entrada no tiene canal alfa, se usa red." M {alpha red}}
+ addUserKnob {3 area_grow l "Area grow (px)" t "Cuanto se agranda la zona de aplicacion antes de suavizarla, en pixeles (disco). Valor habitual: 6."}
+ area_grow 6
+ addUserKnob {7 area_soften l "Area soften (px)" t "Sigma del borde suave de la zona de aplicacion, en pixeles. Valor habitual: 8." R 0 50}
+ area_soften 8
+ addUserKnob {26 line_color l "" +STARTLINE}
+ addUserKnob {26 div_color l "" +STARTLINE T <b>Colorspace</b>}
+ addUserKnob {6 raw l "Inputs are raw file values" t "Marcar si las entradas traen los valores del archivo sin convertir (Read en raw). Desmarcado, el nodo pasa del espacio de trabajo a Files colorspace, hace la cuenta y vuelve." +STARTLINE}
+ addUserKnob {41 colorspace l "Files colorspace" t "Colorspace con el que se leyeron el render y el Plate (tiene que ser el mismo en los dos Read). La cuenta se hace sobre los valores del archivo, tomados como sRGB. Al crear el nodo (o abrir el script), si el colorspace guardado no existe en el config OCIO activo, se elige el rol color_picking (sRGB en los configs que trae Nuke)." T ToFile_render.out_colorspace}
+ addUserKnob {26 line_comp l "" +STARTLINE}
+ addUserKnob {26 div_comp l "" +STARTLINE T "<b>Over Plate</b>"}
+ addUserKnob {6 over_plate l "Composite over Plate" t "Compone el render con la luz del Plate encima del Plate usando el matte elegido. La mezcla se hace siempre en luz lineal (con raw, sobre los valores del archivo pasados a lineal). Desmarcado sale el render completo con la luz corregida." +STARTLINE}
+ addUserKnob {4 matte_from l Matte t "Matte de la composicion sobre el Plate: el alfa del render o la entrada matte (por alfa o por red). Si la entrada matte no tiene canal alfa se usa red; si el render no tiene alfa, el render entero va sobre el Plate." M {"render alpha" "matte input alpha" "matte input red"}}
+ addUserKnob {7 mix l Mix t "Opacidad del render sobre el Plate (multiplica al matte). Solo actua con Composite over Plate."}
+ mix 1
+ addUserKnob {26 div_view l "" +STARTLINE}
+ addUserKnob {4 view l View t "Que muestra la salida: el resultado, la zona de aplicacion (mascara suave) o la ganancia de luz que se le aplica al render (1 = sin cambio)." M {result "area mask" "light gain"}}
+}
+ Constant {
+  inputs 0
+  name MLit_ky_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{1}}
+  box_height {{2*floor(rint(8*(8)+1)/2)+1}}
+  box_fixed true
+  resize none
+  name MLit_ky_tam
+ }
+ Expression {
+  expr3 "(8)<=0 ? 1 : exp(-pow2(y-floor(rint(8*(8)+1)/2))/(2*pow2(8)))"
+  name MLit_ky
+ }
+ Constant {
+  inputs 0
+  name MLit_kx_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*floor(rint(8*(8)+1)/2)+1}}
+  box_height {{1}}
+  box_fixed true
+  resize none
+  name MLit_kx_tam
+ }
+ Expression {
+  expr3 "(8)<=0 ? 1 : exp(-pow2(x-floor(rint(8*(8)+1)/2))/(2*pow2(8)))"
+  name MLit_kx
+ }
+ Constant {
+  inputs 0
+  name Disco4_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*(4)+1}}
+  box_height {{2*(4)+1}}
+  box_fixed true
+  resize none
+  name Disco4_tam
+ }
+ Expression {
+  expr3 "fabs(x-(4)) <= rint(sqrt(pow2(4)-pow2(y-(4))))"
+  name Disco4
+ }
+ Input {
+  inputs 0
+  name skin
+  number 2
+ }
+set Nf62fc400 [stack 0]
+ Input {
+  inputs 0
+  name render
+ }
+set Nf62fd600 [stack 0]
+ Switch {
+  inputs 2
+  which {{"parent.skin_from==2 ? 0 : \[exists parent.input2]"}}
+  name Skin_sel
+ }
+ Expression {
+  temp_name0 ha
+  temp_expr0 "\[lsearch -exact \[channels Skin_sel] rgba.alpha] >= 0"
+  expr3 "parent.skin_from==2 ? (ha ? (a > 0.5) : 1) : (\[exists parent.input2] ? (((parent.skin_from==0 && ha) ? a : r) > 0.5) : 1)"
+  name S
+ }
+set Nec925200 [stack 0]
+ Expression {
+  expr3 1-a
+  name S_inv
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  normalize false
+  name S_inv_dil
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name S_inv_dil_bbox
+ }
+ Expression {
+  expr3 "a>0.5 ? 0 : 1"
+  name S_erode
+ }
+ AdjBBox {
+  numpixels {{floor(rint(8*(8)+1)/2)}}
+  name MLit_pad
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name MLit_x
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name MLit_y
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name MLit
+ }
+ Constant {
+  inputs 0
+  name Blur_plate_ky_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{1}}
+  box_height {{2*floor(rint(8*(parent.sigma)+1)/2)+1}}
+  box_fixed true
+  resize none
+  name Blur_plate_ky_tam
+ }
+ Expression {
+  expr3 "(parent.sigma)<=0 ? 1 : exp(-pow2(y-floor(rint(8*(parent.sigma)+1)/2))/(2*pow2(parent.sigma)))"
+  name Blur_plate_ky
+ }
+ Constant {
+  inputs 0
+  name Blur_plate_kx_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*floor(rint(8*(parent.sigma)+1)/2)+1}}
+  box_height {{1}}
+  box_fixed true
+  resize none
+  name Blur_plate_kx_tam
+ }
+ Expression {
+  expr3 "(parent.sigma)<=0 ? 1 : exp(-pow2(x-floor(rint(8*(parent.sigma)+1)/2))/(2*pow2(parent.sigma)))"
+  name Blur_plate_kx
+ }
+push $Nec925200
+ Input {
+  inputs 0
+  name plate
+  number 1
+ }
+set Nf62fda80 [stack 0]
+ OCIOColorSpace {
+  in_colorspace scene_linear
+  out_colorspace {{ToFile_render.out_colorspace}}
+  name ToFile_plate
+  disable {{parent.raw}}
+ }
+ Expression {
+  expr0 "r<=0.04045 ? r/12.92 : pow((r+0.055)/1.055, 2.4)"
+  expr1 "g<=0.04045 ? g/12.92 : pow((g+0.055)/1.055, 2.4)"
+  expr2 "b<=0.04045 ? b/12.92 : pow((b+0.055)/1.055, 2.4)"
+  name Lin_plate
+ }
+set Nec923400 [stack 0]
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Plate_S
+ }
+ Premult {
+  name Plate_x_S
+ }
+ AdjBBox {
+  numpixels {{floor(rint(8*(parent.sigma)+1)/2)}}
+  name Blur_plate_pad
+ }
+ Convolve2 {
+  inputs 2
+  channels rgba
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_plate_x
+ }
+ Convolve2 {
+  inputs 2
+  channels rgba
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_plate_y
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name Blur_plate
+ }
+ Expression {
+  expr0 "r/max(a, 1e-4)"
+  expr1 "g/max(a, 1e-4)"
+  expr2 "b/max(a, 1e-4)"
+  name LowPlate
+ }
+ Constant {
+  inputs 0
+  name Blur_render_ky_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{1}}
+  box_height {{2*floor(rint(8*(parent.sigma)+1)/2)+1}}
+  box_fixed true
+  resize none
+  name Blur_render_ky_tam
+ }
+ Expression {
+  expr3 "(parent.sigma)<=0 ? 1 : exp(-pow2(y-floor(rint(8*(parent.sigma)+1)/2))/(2*pow2(parent.sigma)))"
+  name Blur_render_ky
+ }
+ Constant {
+  inputs 0
+  name Blur_render_kx_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*floor(rint(8*(parent.sigma)+1)/2)+1}}
+  box_height {{1}}
+  box_fixed true
+  resize none
+  name Blur_render_kx_tam
+ }
+ Expression {
+  expr3 "(parent.sigma)<=0 ? 1 : exp(-pow2(x-floor(rint(8*(parent.sigma)+1)/2))/(2*pow2(parent.sigma)))"
+  name Blur_render_kx
+ }
+push $Nec925200
+push $Nf62fd600
+ OCIOColorSpace {
+  in_colorspace scene_linear
+  out_colorspace "Output - Rec.709"
+  name ToFile_render
+  onCreate "def _lga_lfp_colorspace():\n    # Si el colorspace guardado no existe en el config OCIO activo, se elige uno que si exista.\n    t = nuke.thisNode()\n    k = t.knob('out_colorspace')\n    ok = set()\n    for v in t.knob('in_colorspace').values():\n        p = v.split(chr(9))\n        ok.add(p.pop(0))\n        if len(p) > 2:\n            ok.update(a.strip() for a in p.pop().split(','))\n    if k.value() not in ok:\n        for c in ('color_picking', 'sRGB Encoded Rec.709 (sRGB)', 'sRGB', 'Utility - sRGB - Texture'):\n            if c in ok:\n                k.setValue(c)\n                break\n_lga_lfp_colorspace()\ndel _lga_lfp_colorspace\n"
+  disable {{parent.raw}}
+ }
+ Expression {
+  expr0 "r<=0.04045 ? r/12.92 : pow((r+0.055)/1.055, 2.4)"
+  expr1 "g<=0.04045 ? g/12.92 : pow((g+0.055)/1.055, 2.4)"
+  expr2 "b<=0.04045 ? b/12.92 : pow((b+0.055)/1.055, 2.4)"
+  name Lin_render
+ }
+set Nec923900 [stack 0]
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Render_S
+ }
+ Premult {
+  name Render_x_S
+ }
+ AdjBBox {
+  numpixels {{floor(rint(8*(parent.sigma)+1)/2)}}
+  name Blur_render_pad
+ }
+ Convolve2 {
+  inputs 2
+  channels rgba
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_render_x
+ }
+ Convolve2 {
+  inputs 2
+  channels rgba
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_render_y
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name Blur_render
+ }
+ Expression {
+  expr0 "r/max(a, 1e-4)"
+  expr1 "g/max(a, 1e-4)"
+  expr2 "b/max(a, 1e-4)"
+  name LowRender
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "log(max(Ar, 1e-5)) - log(max(Br, 1e-5))"
+  expr1 "log(max(Ag, 1e-5)) - log(max(Bg, 1e-5))"
+  expr2 "log(max(Ab, 1e-5)) - log(max(Bb, 1e-5))"
+  name LGain
+ }
+set Ne00bed00 [stack 0]
+push $Nec923400
+push $Nec923900
+ MergeExpression {
+  inputs 2
+  expr0 "log(max(Ar, 1e-5)) - log(max(Br, 1e-5))"
+  expr1 "log(max(Ag, 1e-5)) - log(max(Bg, 1e-5))"
+  expr2 "log(max(Ab, 1e-5)) - log(max(Bb, 1e-5))"
+  name LogPlate_LogRender
+ }
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name LDet
+ }
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name LDet_MLit
+ }
+ Premult {
+  name LDet_x_MLit
+ }
+ Multiply {
+  channels rgb
+  value {{1-parent.amount}}
+  name LDet_x_1mAmount
+ }
+ Constant {
+  inputs 0
+  name Blur_fill_ky_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{1}}
+  box_height {{2*floor(rint(8*(3*parent.sigma)+1)/2)+1}}
+  box_fixed true
+  resize none
+  name Blur_fill_ky_tam
+ }
+ Expression {
+  expr3 "(3*parent.sigma)<=0 ? 1 : exp(-pow2(y-floor(rint(8*(3*parent.sigma)+1)/2))/(2*pow2(3*parent.sigma)))"
+  name Blur_fill_ky
+ }
+ Constant {
+  inputs 0
+  name Blur_fill_kx_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*floor(rint(8*(3*parent.sigma)+1)/2)+1}}
+  box_height {{1}}
+  box_fixed true
+  resize none
+  name Blur_fill_kx_tam
+ }
+ Expression {
+  expr3 "(3*parent.sigma)<=0 ? 1 : exp(-pow2(x-floor(rint(8*(3*parent.sigma)+1)/2))/(2*pow2(3*parent.sigma)))"
+  name Blur_fill_kx
+ }
+ Constant {
+  inputs 0
+  name Blur_S2_ky_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{1}}
+  box_height {{2*floor(rint(8*(2*parent.sigma)+1)/2)+1}}
+  box_fixed true
+  resize none
+  name Blur_S2_ky_tam
+ }
+ Expression {
+  expr3 "(2*parent.sigma)<=0 ? 1 : exp(-pow2(y-floor(rint(8*(2*parent.sigma)+1)/2))/(2*pow2(2*parent.sigma)))"
+  name Blur_S2_ky
+ }
+ Constant {
+  inputs 0
+  name Blur_S2_kx_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*floor(rint(8*(2*parent.sigma)+1)/2)+1}}
+  box_height {{1}}
+  box_fixed true
+  resize none
+  name Blur_S2_kx_tam
+ }
+ Expression {
+  expr3 "(2*parent.sigma)<=0 ? 1 : exp(-pow2(x-floor(rint(8*(2*parent.sigma)+1)/2))/(2*pow2(2*parent.sigma)))"
+  name Blur_S2_kx
+ }
+push $Nec925200
+ AdjBBox {
+  numpixels {{floor(rint(8*(2*parent.sigma)+1)/2)}}
+  name Blur_S2_pad
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_S2_x
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_S2_y
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name Blur_S2
+ }
+ Expression {
+  temp_name0 t
+  temp_expr0 clamp((a-0.3)/0.6)
+  expr3 t*t*(3-2*t)
+  name C
+ }
+push $Ne00bed00
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name LGain_C
+ }
+set Ne00c2d00 [stack 0]
+ Premult {
+  name LGain_x_C
+ }
+ AdjBBox {
+  numpixels {{floor(rint(8*(3*parent.sigma)+1)/2)}}
+  name Blur_fill_pad
+ }
+ Convolve2 {
+  inputs 2
+  channels rgba
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_fill_x
+ }
+ Convolve2 {
+  inputs 2
+  channels rgba
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name Blur_fill_y
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name Blur_fill
+ }
+ Expression {
+  expr0 "r/max(a, 1e-4)"
+  expr1 "g/max(a, 1e-4)"
+  expr2 "b/max(a, 1e-4)"
+  name Fill
+ }
+push $Ne00c2d00
+ MergeExpression {
+  inputs 2
+  expr0 "Ba*Br + (1-Ba)*Ar"
+  expr1 "Ba*Bg + (1-Ba)*Ag"
+  expr2 "Ba*Bb + (1-Ba)*Ab"
+  channel3 none
+  name LGain_ext
+ }
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Exponente
+  disable {{parent.amount==1}}
+ }
+set Ne00ced00 [stack 0]
+ Expression {
+  expr0 exp(r)
+  expr1 exp(g)
+  expr2 exp(b)
+  name View_gain
+ }
+ Constant {
+  inputs 0
+  name MApp_ky_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{1}}
+  box_height {{2*floor(rint(8*(parent.area_soften)+1)/2)+1}}
+  box_fixed true
+  resize none
+  name MApp_ky_tam
+ }
+ Expression {
+  expr3 "(parent.area_soften)<=0 ? 1 : exp(-pow2(y-floor(rint(8*(parent.area_soften)+1)/2))/(2*pow2(parent.area_soften)))"
+  name MApp_ky
+ }
+ Constant {
+  inputs 0
+  name MApp_kx_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*floor(rint(8*(parent.area_soften)+1)/2)+1}}
+  box_height {{1}}
+  box_fixed true
+  resize none
+  name MApp_kx_tam
+ }
+ Expression {
+  expr3 "(parent.area_soften)<=0 ? 1 : exp(-pow2(x-floor(rint(8*(parent.area_soften)+1)/2))/(2*pow2(parent.area_soften)))"
+  name MApp_kx
+ }
+ Constant {
+  inputs 0
+  name DiscoGrow_base
+ }
+ Reformat {
+  type "to box"
+  box_width {{2*(parent.area_grow)+1}}
+  box_height {{2*(parent.area_grow)+1}}
+  box_fixed true
+  resize none
+  name DiscoGrow_tam
+ }
+ Expression {
+  expr3 "fabs(x-(parent.area_grow)) <= rint(sqrt(pow2(parent.area_grow)-pow2(y-(parent.area_grow))))"
+  name DiscoGrow
+ }
+ Input {
+  inputs 0
+  name area
+  number 3
+ }
+set Nf62fd180 [stack 0]
+push $Nec925200
+ MergeExpression {
+  inputs 2
+  temp_name0 ha
+  temp_expr0 "\[lsearch -exact \[channels area] rgba.alpha] >= 0"
+  expr3 "max(\[exists parent.input3] ? (((parent.area_from==0 && ha) ? Aa : Ar) > 0.5) : 0, Ba)"
+  name Area_bin
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  normalize false
+  name Area_dil
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name Area_dil_bbox
+ }
+ Expression {
+  expr3 a>0.5
+  name Area_dil_bin
+ }
+ AdjBBox {
+  numpixels {{floor(rint(8*(parent.area_soften)+1)/2)}}
+  name MApp_pad
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name MApp_x
+ }
+ Convolve2 {
+  inputs 2
+  channels alpha
+  useGPUIfAvailable false
+  useFourier false
+  filter_bounds format
+  name MApp_y
+ }
+ Crop {
+  box {{0} {0} {input.width} {input.height}}
+  crop false
+  name MApp
+ }
+set Ne00d8f00 [stack 0]
+ Expression {
+  expr0 a
+  expr1 a
+  expr2 a
+  name View_area
+ }
+ Input {
+  inputs 0
+  name matte
+  number 4
+ }
+set Nf62fbb00 [stack 0]
+push $Nf62fd600
+ MergeExpression {
+  inputs 2
+  temp_name0 ha
+  temp_expr0 "\[lsearch -exact \[channels matte] rgba.alpha] >= 0"
+  temp_name1 hb
+  temp_expr1 "\[lsearch -exact \[channels render] rgba.alpha] >= 0"
+  expr3 "parent.matte_from==0 ? (hb ? Ba : 1) : ((parent.matte_from==1 && ha) ? Aa : Ar)"
+  name Matte_sel
+ }
+push $Ne00d8f00
+push $Ne00d8f00
+push $Ne00ced00
+push $Nec923900
+ MergeExpression {
+  inputs 2
+  expr0 Br*exp(Ar)
+  expr1 Bg*exp(Ag)
+  expr2 Bb*exp(Ab)
+  channel3 none
+  name L
+ }
+push $Nec923900
+ Keymix {
+  inputs 3
+  channels rgb
+  name Mezcla_lineal
+ }
+ Expression {
+  expr0 "clamp(r)<=0.0031308 ? clamp(r)*12.92 : 1.055*pow(clamp(r), 1/2.4)-0.055"
+  expr1 "clamp(g)<=0.0031308 ? clamp(g)*12.92 : 1.055*pow(clamp(g), 1/2.4)-0.055"
+  expr2 "clamp(b)<=0.0031308 ? clamp(b)*12.92 : 1.055*pow(clamp(b), 1/2.4)-0.055"
+  name A_sRGB
+ }
+ OCIOColorSpace {
+  in_colorspace {{ToFile_render.out_colorspace}}
+  out_colorspace scene_linear
+  name FromFile
+  disable {{parent.raw}}
+ }
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Result_MApp
+ }
+push $Nf62fd600
+ MergeExpression {
+  inputs 2
+  expr0 "Aa>1e-5 ? Ar : Br"
+  expr1 "Aa>1e-5 ? Ag : Bg"
+  expr2 "Aa>1e-5 ? Ab : Bb"
+  channel3 none
+  name Result
+ }
+set Ne00da800 [stack 0]
+ Expression {
+  expr0 "r<=0.04045 ? r/12.92 : pow((r+0.055)/1.055, 2.4)"
+  expr1 "g<=0.04045 ? g/12.92 : pow((g+0.055)/1.055, 2.4)"
+  expr2 "b<=0.04045 ? b/12.92 : pow((b+0.055)/1.055, 2.4)"
+  name Over_lin_result
+  disable {{1-parent.raw}}
+ }
+push $Nf62fda80
+ Expression {
+  expr0 "r<=0.04045 ? r/12.92 : pow((r+0.055)/1.055, 2.4)"
+  expr1 "g<=0.04045 ? g/12.92 : pow((g+0.055)/1.055, 2.4)"
+  expr2 "b<=0.04045 ? b/12.92 : pow((b+0.055)/1.055, 2.4)"
+  name Over_lin_plate
+  disable {{1-parent.raw}}
+ }
+ Keymix {
+  inputs 3
+  channels rgb
+  mix {{parent.mix}}
+  name Over_plate
+ }
+ Expression {
+  expr0 "r<=0.0031308 ? r*12.92 : 1.055*pow(r, 1/2.4)-0.055"
+  expr1 "g<=0.0031308 ? g*12.92 : 1.055*pow(g, 1/2.4)-0.055"
+  expr2 "b<=0.0031308 ? b*12.92 : 1.055*pow(b, 1/2.4)-0.055"
+  name Over_sRGB
+  disable {{1-parent.raw}}
+ }
+push $Ne00da800
+ Switch {
+  inputs 2
+  which {{parent.over_plate}}
+  name Final_sel
+ }
+push $Nf62fd600
+ Copy {
+  inputs 2
+  channels rgb
+  bbox B
+  name Out_rgb
+ }
+ Switch {
+  inputs 3
+  which {{parent.view}}
+  name View_sel
+ }
+ Output {
+  name Output1
+ }
+push $Nf62fd180
+push $Nf62fc400
+push $Nf62fbb00
+ Switch {
+  inputs 3
+  which {{parent.measure_from}}
+  name Measure_sel
+ }
+ Expression {
+  temp_name0 u
+  temp_expr0 "parent.measure_from==0 ? parent.matte_from==2 : (parent.measure_from==1 ? parent.skin_from==1 : parent.area_from==1)"
+  temp_name1 ha
+  temp_expr1 "\[lsearch -exact \[channels Measure_sel] rgba.alpha] >= 0"
+  expr0 "((u || ha==0) ? r : a) > 0.5"
+  expr1 "((u || ha==0) ? r : a) > 0.5"
+  expr2 "((u || ha==0) ? r : a) > 0.5"
+  name Measure_bin
+ }
+end_group
