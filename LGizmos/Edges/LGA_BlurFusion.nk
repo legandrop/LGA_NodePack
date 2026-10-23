@@ -1,0 +1,289 @@
+set cut_paste_input [stack 0]
+version 17.0 v4
+push $cut_paste_input
+Group {
+ name LGA_BlurFusion1
+ tile_color 0x7a9cc6ff
+ selected true
+ addUserKnob {20 blur_fusion_tab l Blur-Fusion}
+ addUserKnob {26 info l "" +STARTLINE T "Foreground colour for soft edges (Forte & Pitie, ICIP 2021).\nSource: plate rgb.  Matte: alpha (if empty, Source alpha is used)."}
+ addUserKnob {7 large_size l "large size" t "Ancho en pixeles de la caja de la primera pasada. Define de que zona se toma el color medio del frente y del fondo alrededor del borde. El paper usa 90." R 1 400}
+ large_size 90
+ addUserKnob {7 small_size l "small size" t "Ancho en pixeles de la caja de la segunda pasada, que refina el color cerca del borde usando el resultado de la primera. El paper usa 6." R 1 50}
+ small_size 6
+ addUserKnob {7 alpha_gamma l "alpha gamma" t "Gamma del matte: a' = a^gamma, aplicado antes de Blur-Fusion y en el alpha de salida. 0 y 1 no cambian; con valores mayores que 1 los semitransparentes del borde se afinan. Sirve con pelo a contraluz sobre un fondo mucho mas brillante, donde el matte deja pasar fondo de mas: 1.6 a 2.0 limpia el velo, a costa de afinar el pelo suelto. 1 = sin cambio." R 0.5 3}
+ alpha_gamma 1
+ addUserKnob {6 premultiply t "Prendido: la salida sale premultiplicada por el matte, lista para un Merge over. Apagado: sale el color del frente sin premultiplicar, con el matte en el alpha." +STARTLINE}
+ premultiply true
+ addUserKnob {26 advanced_divider l advanced}
+ addUserKnob {6 clamp_negative l "clamp negatives" t "Lleva a cero los valores negativos que puede dejar la correccion. No recorta arriba de 1: en lineal los brillos pasan de 1." +STARTLINE}
+ clamp_negative true
+ addUserKnob {7 epsilon t "Valor chico que se suma a los divisores para no dividir por cero donde el blur del matte (o de su inverso) da cero." R 0 0.001}
+ epsilon 1e-05
+}
+ Input {
+  inputs 0
+  name Matte
+  xpos 300
+  ypos -300
+  number 1
+ }
+ Input {
+  inputs 0
+  name Source
+  xpos 0
+  ypos -300
+ }
+set Neee9e000 [stack 0]
+ Switch {
+  inputs 2
+  which {{"\[exists parent.input1]"}}
+  name matte_or_source
+  xpos 300
+  ypos -240
+ }
+push $Neee9e000
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name copy_alpha
+  xpos 0
+  ypos -240
+ }
+ Expression {
+  expr0 r
+  expr1 g
+  expr2 b
+  expr3 "pow(clamp(a, 0, 1), parent.alpha_gamma)"
+  name image_and_matte
+  xpos 0
+  ypos -200
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_image
+  xpos 0
+  ypos -160
+ }
+set Neeea8f00 [stack 0]
+ Expression {
+  expr0 r*(a)
+  expr1 g*(a)
+  expr2 b*(a)
+  expr3 a
+  name weight_F1
+  xpos 0
+  ypos -80
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_F1
+  xpos 0
+  ypos -40
+ }
+ Blur {
+  channels rgba
+  size {{parent.large_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_F1
+  xpos 0
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_F1
+  xpos 0
+  ypos 40
+ }
+push $Neeea8f00
+ Expression {
+  expr0 r*(1-a)
+  expr1 g*(1-a)
+  expr2 b*(1-a)
+  expr3 1-a
+  name weight_B1
+  xpos 150
+  ypos -80
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_B1
+  xpos 150
+  ypos -40
+ }
+ Blur {
+  channels rgba
+  size {{parent.large_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_B1
+  xpos 150
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_B1
+  xpos 150
+  ypos 40
+ }
+set Neeeab700 [stack 0]
+push $Neeea8f00
+ MergeExpression {
+  inputs 2
+  expr0 Br-(1-Ba)*Ar
+  expr1 Bg-(1-Ba)*Ag
+  expr2 Bb-(1-Ba)*Ab
+  expr3 Ba
+  name rest_1
+  xpos 150
+  ypos 100
+ }
+ MergeExpression {
+  inputs 2
+  expr0 Ar+Ba*(Br-Ba*Ar)
+  expr1 Ag+Ba*(Bg-Ba*Ag)
+  expr2 Ab+Ba*(Bb-Ba*Ab)
+  expr3 Ba
+  name fg_1
+  xpos 0
+  ypos 160
+ }
+ Expression {
+  expr0 "parent.clamp_negative ? max(r, 0) : r"
+  expr1 "parent.clamp_negative ? max(g, 0) : g"
+  expr2 "parent.clamp_negative ? max(b, 0) : b"
+  expr3 a
+  name clamp_1
+  xpos 0
+  ypos 200
+ }
+ Expression {
+  expr0 r*(a)
+  expr1 g*(a)
+  expr2 b*(a)
+  expr3 a
+  name weight_F2
+  xpos 0
+  ypos 320
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_F2
+  xpos 0
+  ypos 360
+ }
+ Blur {
+  channels rgba
+  size {{parent.small_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_F2
+  xpos 0
+  ypos 400
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_F2
+  xpos 0
+  ypos 440
+ }
+push $Neeea8f00
+push $Neeeab700
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name bg1_with_matte
+  xpos 300
+  ypos 260
+ }
+ Expression {
+  expr0 r*(1-a)
+  expr1 g*(1-a)
+  expr2 b*(1-a)
+  expr3 1-a
+  name weight_B2
+  xpos 150
+  ypos 320
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_B2
+  xpos 150
+  ypos 360
+ }
+ Blur {
+  channels rgba
+  size {{parent.small_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_B2
+  xpos 150
+  ypos 400
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_B2
+  xpos 150
+  ypos 440
+ }
+push $Neeea8f00
+ MergeExpression {
+  inputs 2
+  expr0 Br-(1-Ba)*Ar
+  expr1 Bg-(1-Ba)*Ag
+  expr2 Bb-(1-Ba)*Ab
+  expr3 Ba
+  name rest_2
+  xpos 150
+  ypos 500
+ }
+ MergeExpression {
+  inputs 2
+  expr0 Ar+Ba*(Br-Ba*Ar)
+  expr1 Ag+Ba*(Bg-Ba*Ag)
+  expr2 Ab+Ba*(Bb-Ba*Ab)
+  expr3 Ba
+  name fg_2
+  xpos 0
+  ypos 560
+ }
+ Expression {
+  expr0 "parent.clamp_negative ? max(r, 0) : r"
+  expr1 "parent.clamp_negative ? max(g, 0) : g"
+  expr2 "parent.clamp_negative ? max(b, 0) : b"
+  expr3 a
+  name clamp_2
+  xpos 0
+  ypos 600
+ }
+ Premult {
+  name premult
+  xpos 0
+  ypos 660
+  disable {{!parent.premultiply}}
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_output
+  xpos 0
+  ypos 700
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 760
+ }
+end_group
