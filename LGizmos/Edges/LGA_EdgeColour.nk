@@ -1,0 +1,1256 @@
+set cut_paste_input [stack 0]
+version 17.0 v4
+push $cut_paste_input
+Group {
+ name LGA_EdgeColour1
+ tile_color 0x7a9cc6ff
+ selected true
+ addUserKnob {20 edge_colour_tab l "Edge Colour"}
+ addUserKnob {26 info l "" +STARTLINE T "Clean foreground colour in the soft edge: the solid inside colour pushed outwards,\nwith Blur-Fusion luminance kept in the local range. The alpha is not changed.\nSource: plate rgb.  Matte: alpha (if empty, Source alpha is used)."}
+ addUserKnob {4 view t "Que muestra la salida: el resultado, el peso del reemplazo (blanco = color reconstruido) o el color del interior empujado hacia afuera." M {result "edge weight" "extended colour"}}
+ addUserKnob {26 inner_divider l inside}
+ addUserKnob {7 erode t "Cuantos pixeles se achica el interior solido antes de usarlo como fuente de color. Valor habitual en UHD: 4." R 0 20}
+ erode 4
+ addUserKnob {7 inner_low l "inner softness" t "Rango del alpha donde el interior pasa de banda (abajo) a solido (arriba), con curva suave. Valores habituales: 0.90 y 0.99." R 0.5 1}
+ inner_low 0.9
+ addUserKnob {7 inner_high l "" t "Rango del alpha donde el interior pasa de banda (abajo) a solido (arriba), con curva suave. Valores habituales: 0.90 y 0.99." -STARTLINE R 0.5 1}
+ inner_high 0.99
+ addUserKnob {7 inner_blur l "inner blur" t "Suavizado en pixeles del borde del interior: evita un corte duro entre el PLATE y el color reconstruido. Valor habitual: 4." R 0 30}
+ inner_blur 4
+ addUserKnob {26 edge_divider l edge}
+ addUserKnob {7 near t "Distancia en pixeles al fondo real (alpha casi 0) hasta donde el color se reemplaza entero. Valor habitual en UHD: 48." R 0 400}
+ near 48
+ addUserKnob {7 far t "Distancia en pixeles al fondo real donde el reemplazo ya se apago y vuelve el PLATE. Entre near y far hay una rampa suave. Valor habitual en UHD: 80." R 0 600}
+ far 80
+ addUserKnob {7 spread t "Multiplica las escalas con que el color del interior se empuja hacia afuera. 1 = escalas de un plano UHD; 0.5 para HD." R 0.25 4}
+ spread 1
+ addUserKnob {7 luma_range l "luma range" t "Cuantos desvios de la luminancia del interior puede alejarse la luminancia del borde. Mas alto deja pasar mas brillo del borde original (y del fondo). Valor habitual: 1.5." R 0 5}
+ luma_range 1.5
+ addUserKnob {6 temporal l "temporal smoothing" t "Promedia el color del borde con los dos cuadros de antes y los dos de despues, alineados con vectores de movimiento, para que no tiemble. Usa VectorGenerator (de NukeX en algunas licencias), corre en CPU y es unas seis veces mas lento." +STARTLINE}
+ addUserKnob {6 premultiply t "Prendido: la salida sale premultiplicada por el matte. Apagado: sale el color sin premultiplicar, con el matte en el alpha." +STARTLINE}
+ premultiply true
+ addUserKnob {26 advanced_divider l advanced}
+ addUserKnob {7 bg_threshold l "background below" t "Alpha por debajo del cual un pixel cuenta como fondo real para medir near y far." R 0 0.5}
+ bg_threshold 0.05
+ addUserKnob {7 match_tolerance l "temporal tolerance" t "Cuanto puede diferir el PLATE alineado de un cuadro vecino (en gris ACEScct) para que ese cuadro cuente en el promedio temporal. Mas bajo descarta antes los cuadros mal alineados." R 0.001 0.2}
+ match_tolerance 0.03137254902
+ addUserKnob {7 large_size l "blur-fusion large" t "Caja grande de Blur-Fusion, de donde sale la luminancia del borde. Valor habitual: 90." R 1 400}
+ large_size 90
+ addUserKnob {7 small_size l "blur-fusion small" t "Caja chica de Blur-Fusion. Valor habitual: 6." R 1 50}
+ small_size 6
+ addUserKnob {6 clamp_negative l "clamp negatives" t "Lleva a cero los negativos de Blur-Fusion." +STARTLINE}
+ clamp_negative true
+ addUserKnob {7 epsilon t "Valor chico que se suma a los divisores." R 0 0.001}
+ epsilon 1e-05
+}
+ Input {
+  inputs 0
+  name Matte
+  xpos 300
+  ypos -400
+  number 1
+ }
+ Input {
+  inputs 0
+  name Source
+  xpos 0
+  ypos -400
+ }
+set Na1210000 [stack 0]
+ Switch {
+  inputs 2
+  which {{"\[exists parent.input1]"}}
+  name matte_or_source
+  xpos 300
+  ypos -340
+ }
+push $Na1210000
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name copy_alpha
+  xpos 0
+  ypos -340
+ }
+ Expression {
+  expr0 r
+  expr1 g
+  expr2 b
+  expr3 "clamp(a, 0, 1)"
+  name image_and_matte
+  xpos 0
+  ypos -300
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_image
+  xpos 0
+  ypos -260
+ }
+set Na121af00 [stack 0]
+push $Na121af00
+ Expression {
+  expr0 r
+  expr1 g
+  expr2 b
+  expr3 "smoothstep(parent.inner_low, parent.inner_high, a)"
+  name inside_curve
+  xpos 300
+  ypos -200
+ }
+ Dilate {
+  channels alpha
+  size {{-parent.erode}}
+  name inside_erode
+  xpos 300
+  ypos -160
+ }
+ Blur {
+  channels alpha
+  size {{parent.inner_blur}}
+  name inside_soft
+  xpos 300
+  ypos -120
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_inside
+  xpos 300
+  ypos -80
+ }
+set Nc340fe00 [stack 0]
+ Expression {
+  expr0 r*a
+  expr1 g*a
+  expr2 b*a
+  expr3 a
+  name push_colour_src
+  xpos 300
+  ypos -40
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_push_colour
+  xpos 300
+ }
+set Nc3410d00 [stack 0]
+ Blur {
+  channels rgba
+  size {{2.0000*parent.spread/0.4243}}
+  name push_colour_2
+  xpos 300
+  ypos 1020
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_2
+  xpos 300
+  ypos 1060
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{4.0000*parent.spread/0.4243}}
+  name push_colour_4
+  xpos 300
+  ypos 900
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_4
+  xpos 300
+  ypos 940
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{8.0000*parent.spread/0.4243}}
+  name push_colour_8
+  xpos 300
+  ypos 780
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_8
+  xpos 300
+  ypos 820
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{16.0000*parent.spread/0.4243}}
+  name push_colour_16
+  xpos 300
+  ypos 660
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_16
+  xpos 300
+  ypos 700
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{32.0000*parent.spread/0.4243}}
+  name push_colour_32
+  xpos 300
+  ypos 540
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_32
+  xpos 300
+  ypos 580
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{64.0000*parent.spread/0.4243}}
+  name push_colour_64
+  xpos 300
+  ypos 420
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_64
+  xpos 300
+  ypos 460
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{128.0000*parent.spread/0.4243}}
+  name push_colour_128
+  xpos 300
+  ypos 300
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_128
+  xpos 300
+  ypos 340
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{256.0000*parent.spread/0.4243}}
+  name push_colour_256
+  xpos 300
+  ypos 180
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_256
+  xpos 300
+  ypos 220
+ }
+push $Nc3410d00
+ Blur {
+  channels rgba
+  size {{512.0000*parent.spread/0.4243}}
+  name push_colour_512
+  xpos 300
+  ypos 60
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_colour_norm_512
+  xpos 300
+  ypos 100
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_256
+  xpos 300
+  ypos 260
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_128
+  xpos 300
+  ypos 380
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_64
+  xpos 300
+  ypos 500
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_32
+  xpos 300
+  ypos 620
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_16
+  xpos 300
+  ypos 740
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_8
+  xpos 300
+  ypos 860
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_4
+  xpos 300
+  ypos 980
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_colour_mix_2
+  xpos 300
+  ypos 1100
+ }
+set Nc35b6000 [stack 0]
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name view_extended
+  xpos 600
+  ypos 1420
+ }
+push $Na121af00
+ Expression {
+  expr0 r*(a)
+  expr1 g*(a)
+  expr2 b*(a)
+  expr3 a
+  name weight_F1
+  xpos -900
+  ypos -200
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_F1
+  xpos -900
+  ypos -160
+ }
+ Blur {
+  channels rgba
+  size {{parent.large_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_F1
+  xpos -900
+  ypos -120
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_F1
+  xpos -900
+  ypos -80
+ }
+push $Na121af00
+ Expression {
+  expr0 r*(1-a)
+  expr1 g*(1-a)
+  expr2 b*(1-a)
+  expr3 1-a
+  name weight_B1
+  xpos -750
+  ypos -200
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_B1
+  xpos -750
+  ypos -160
+ }
+ Blur {
+  channels rgba
+  size {{parent.large_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_B1
+  xpos -750
+  ypos -120
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_B1
+  xpos -750
+  ypos -80
+ }
+set Na121d700 [stack 0]
+push $Na121af00
+ MergeExpression {
+  inputs 2
+  expr0 Br-(1-Ba)*Ar
+  expr1 Bg-(1-Ba)*Ag
+  expr2 Bb-(1-Ba)*Ab
+  expr3 Ba
+  name rest_1
+  xpos -750
+  ypos -20
+ }
+ MergeExpression {
+  inputs 2
+  expr0 Ar+Ba*(Br-Ba*Ar)
+  expr1 Ag+Ba*(Bg-Ba*Ag)
+  expr2 Ab+Ba*(Bb-Ba*Ab)
+  expr3 Ba
+  name fg_1
+  xpos -900
+  ypos 40
+ }
+ Expression {
+  expr0 "parent.clamp_negative ? max(r, 0) : r"
+  expr1 "parent.clamp_negative ? max(g, 0) : g"
+  expr2 "parent.clamp_negative ? max(b, 0) : b"
+  expr3 a
+  name clamp_1
+  xpos -900
+  ypos 80
+ }
+ Expression {
+  expr0 r*(a)
+  expr1 g*(a)
+  expr2 b*(a)
+  expr3 a
+  name weight_F2
+  xpos -900
+  ypos 200
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_F2
+  xpos -900
+  ypos 240
+ }
+ Blur {
+  channels rgba
+  size {{parent.small_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_F2
+  xpos -900
+  ypos 280
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_F2
+  xpos -900
+  ypos 320
+ }
+push $Na121af00
+push $Na121d700
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name bg1_with_matte
+  xpos -600
+  ypos 140
+ }
+ Expression {
+  expr0 r*(1-a)
+  expr1 g*(1-a)
+  expr2 b*(1-a)
+  expr3 1-a
+  name weight_B2
+  xpos -750
+  ypos 200
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_B2
+  xpos -750
+  ypos 240
+ }
+ Blur {
+  channels rgba
+  size {{parent.small_size}}
+  filter box
+  quality {{"max(15, size + 1)"}}
+  name blur_B2
+  xpos -750
+  ypos 280
+ }
+ Expression {
+  expr0 r/(a+parent.epsilon)
+  expr1 g/(a+parent.epsilon)
+  expr2 b/(a+parent.epsilon)
+  expr3 a
+  name mean_B2
+  xpos -750
+  ypos 320
+ }
+push $Na121af00
+ MergeExpression {
+  inputs 2
+  expr0 Br-(1-Ba)*Ar
+  expr1 Bg-(1-Ba)*Ag
+  expr2 Bb-(1-Ba)*Ab
+  expr3 Ba
+  name rest_2
+  xpos -750
+  ypos 380
+ }
+ MergeExpression {
+  inputs 2
+  expr0 Ar+Ba*(Br-Ba*Ar)
+  expr1 Ag+Ba*(Bg-Ba*Ag)
+  expr2 Ab+Ba*(Bb-Ba*Ab)
+  expr3 Ba
+  name fg_2
+  xpos -900
+  ypos 440
+ }
+ Expression {
+  expr0 "parent.clamp_negative ? max(r, 0) : r"
+  expr1 "parent.clamp_negative ? max(g, 0) : g"
+  expr2 "parent.clamp_negative ? max(b, 0) : b"
+  expr3 a
+  name clamp_2
+  xpos -900
+  ypos 480
+ }
+push $Nc340fe00
+ Expression {
+  expr0 (0.2722287*r+0.6740818*g+0.0536895*b)*a
+  expr1 (0.2722287*r+0.6740818*g+0.0536895*b)*(0.2722287*r+0.6740818*g+0.0536895*b)*a
+  expr2 0
+  expr3 a
+  name push_luma_src
+  xpos 600
+  ypos -40
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_push_luma
+  xpos 600
+ }
+set Nc3411200 [stack 0]
+ Blur {
+  channels rgba
+  size {{2.0000*parent.spread/0.4243}}
+  name push_luma_2
+  xpos 600
+  ypos 1020
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_2
+  xpos 600
+  ypos 1060
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{4.0000*parent.spread/0.4243}}
+  name push_luma_4
+  xpos 600
+  ypos 900
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_4
+  xpos 600
+  ypos 940
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{8.0000*parent.spread/0.4243}}
+  name push_luma_8
+  xpos 600
+  ypos 780
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_8
+  xpos 600
+  ypos 820
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{16.0000*parent.spread/0.4243}}
+  name push_luma_16
+  xpos 600
+  ypos 660
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_16
+  xpos 600
+  ypos 700
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{32.0000*parent.spread/0.4243}}
+  name push_luma_32
+  xpos 600
+  ypos 540
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_32
+  xpos 600
+  ypos 580
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{64.0000*parent.spread/0.4243}}
+  name push_luma_64
+  xpos 600
+  ypos 420
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_64
+  xpos 600
+  ypos 460
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{128.0000*parent.spread/0.4243}}
+  name push_luma_128
+  xpos 600
+  ypos 300
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_128
+  xpos 600
+  ypos 340
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{256.0000*parent.spread/0.4243}}
+  name push_luma_256
+  xpos 600
+  ypos 180
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_256
+  xpos 600
+  ypos 220
+ }
+push $Nc3411200
+ Blur {
+  channels rgba
+  size {{512.0000*parent.spread/0.4243}}
+  name push_luma_512
+  xpos 600
+  ypos 60
+ }
+ Expression {
+  expr0 "a > 1e-6 ? r/a : 0"
+  expr1 "a > 1e-6 ? g/a : 0"
+  expr2 "a > 1e-6 ? b/a : 0"
+  expr3 a
+  name push_luma_norm_512
+  xpos 600
+  ypos 100
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_256
+  xpos 600
+  ypos 260
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_128
+  xpos 600
+  ypos 380
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_64
+  xpos 600
+  ypos 500
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_32
+  xpos 600
+  ypos 620
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_16
+  xpos 600
+  ypos 740
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_8
+  xpos 600
+  ypos 860
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_4
+  xpos 600
+  ypos 980
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br+smoothstep(0.05, 0.15, Aa)*(Ar-Br)"
+  expr1 "Bg+smoothstep(0.05, 0.15, Aa)*(Ag-Bg)"
+  expr2 "Bb+smoothstep(0.05, 0.15, Aa)*(Ab-Bb)"
+  expr3 "max(Aa, Ba)"
+  name push_luma_mix_2
+  xpos 600
+  ypos 1100
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "clamp(Aa > 1e-3 ? (0.2722287*Ar+0.6740818*Ag+0.0536895*Ab) : Br, Br - parent.luma_range*sqrt(max(Bg - Br*Br, 0)), Br + parent.luma_range*sqrt(max(Bg - Br*Br, 0)))"
+  expr1 "clamp(Aa > 1e-3 ? (0.2722287*Ar+0.6740818*Ag+0.0536895*Ab) : Br, Br - parent.luma_range*sqrt(max(Bg - Br*Br, 0)), Br + parent.luma_range*sqrt(max(Bg - Br*Br, 0)))"
+  expr2 "clamp(Aa > 1e-3 ? (0.2722287*Ar+0.6740818*Ag+0.0536895*Ab) : Br, Br - parent.luma_range*sqrt(max(Bg - Br*Br, 0)), Br + parent.luma_range*sqrt(max(Bg - Br*Br, 0)))"
+  expr3 Ba
+  name luma_target
+  xpos 600
+  ypos 1260
+ }
+push $Nc35b6000
+ MergeExpression {
+  inputs 2
+  expr0 "max((0.2722287*Br+0.6740818*Bg+0.0536895*Bb) > 1e-5 ? Br*Ar/(0.2722287*Br+0.6740818*Bg+0.0536895*Bb) : Br, 0)"
+  expr1 "max((0.2722287*Br+0.6740818*Bg+0.0536895*Bb) > 1e-5 ? Bg*Ar/(0.2722287*Br+0.6740818*Bg+0.0536895*Bb) : Bg, 0)"
+  expr2 "max((0.2722287*Br+0.6740818*Bg+0.0536895*Bb) > 1e-5 ? Bb*Ar/(0.2722287*Br+0.6740818*Bg+0.0536895*Bb) : Bb, 0)"
+  expr3 Ba
+  name edge_colour
+  xpos 300
+  ypos 1300
+ }
+push $Na121af00
+ Expression {
+  expr0 0
+  expr1 0
+  expr2 0
+  expr3 "a < parent.bg_threshold ? 1 : 0"
+  name background
+  xpos 900
+  ypos -240
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_background
+  xpos 900
+  ypos -200
+ }
+ Dilate {
+  channels alpha
+  size {{"(parent.near + parent.far)/2"}}
+  name background_grow
+  xpos 900
+  ypos -160
+ }
+ Blur {
+  channels alpha
+  size {{"max(0, parent.far - parent.near)/4/0.4243"}}
+  name background_ramp
+  xpos 900
+  ypos -120
+ }
+push $Nc340fe00
+ MergeExpression {
+  inputs 2
+  expr0 0
+  expr1 0
+  expr2 0
+  expr3 "(1 - Ba)*Aa"
+  name weight_inside_near
+  xpos 900
+  ypos 1260
+ }
+ MergeExpression {
+  inputs 2
+  expr0 Ar
+  expr1 Ag
+  expr2 Ab
+  expr3 "Ba*smoothstep(0.01, 0.05, Aa)"
+  name weight_reach
+  xpos 600
+  ypos 1340
+ }
+set Nc36d7200 [stack 0]
+push $Na121af00
+ MergeExpression {
+  inputs 2
+  expr0 Aa
+  expr1 Aa
+  expr2 Aa
+  expr3 Ba
+  name view_weight
+  xpos 300
+  ypos 1420
+ }
+push $Na121af00
+ Expression {
+  expr0 "clamp((max(r, 1e-10) <= 0.0078125 ? 10.5402377416545*max(r, 1e-10) + 0.0729055341958355 : (log(max(r, 1e-10))/log(2) + 9.72)/17.52)/0.75, 0, 1)"
+  expr1 "clamp((max(g, 1e-10) <= 0.0078125 ? 10.5402377416545*max(g, 1e-10) + 0.0729055341958355 : (log(max(g, 1e-10))/log(2) + 9.72)/17.52)/0.75, 0, 1)"
+  expr2 "clamp((max(b, 1e-10) <= 0.0078125 ? 10.5402377416545*max(b, 1e-10) + 0.0729055341958355 : (log(max(b, 1e-10))/log(2) + 9.72)/17.52)/0.75, 0, 1)"
+  expr3 "clamp((max((0.2722287*r+0.6740818*g+0.0536895*b), 1e-10) <= 0.0078125 ? 10.5402377416545*max((0.2722287*r+0.6740818*g+0.0536895*b), 1e-10) + 0.0729055341958355 : (log(max((0.2722287*r+0.6740818*g+0.0536895*b), 1e-10))/log(2) + 9.72)/17.52)/0.75, 0, 1)"
+  name temporal_guide
+  xpos 1300
+  ypos 1300
+ }
+set Nc3758000 [stack 0]
+push $Nc36d7200
+push $Na121af00
+ MergeExpression {
+  inputs 2
+  expr0 "Br + Aa*(Ar - Br)"
+  expr1 "Bg + Aa*(Ag - Bg)"
+  expr2 "Bb + Aa*(Ab - Bb)"
+  expr3 Ba
+  name edge_result
+  xpos 0
+  ypos 1380
+ }
+set Nc36d7700 [stack 0]
+ MergeExpression {
+  inputs 2
+  expr0 Br
+  expr1 Bg
+  expr2 Bb
+  expr3 Aa
+  name temporal_colour_gray
+  xpos 1500
+  ypos 1340
+ }
+push $Nc3758000
+ VectorGenerator {
+  useGPUIfAvailable false
+  name temporal_vectors
+  xpos 1300
+  ypos 1340
+ }
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_pack
+  xpos 1300
+  ypos 1380
+ }
+set Nc3758f00 [stack 0]
+ TimeOffset {
+  time_offset -2
+  time ""
+  name temporal_offset_prev2
+  xpos 1000
+  ypos 1440
+ }
+push $Nc3758f00
+ TimeOffset {
+  time_offset -1
+  time ""
+  name temporal_offset_prev1
+  xpos 1150
+  ypos 1440
+ }
+set Nc3788800 [stack 0]
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_warp_prev2_a_copy
+  xpos 1000
+  ypos 1500
+ }
+ IDistort {
+  channels rgba
+  uv backward
+  name temporal_warp_prev2_a
+  xpos 1000
+  ypos 1540
+ }
+push $Nc3758f00
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_warp_prev2_copy
+  xpos 1000
+  ypos 1580
+ }
+ IDistort {
+  channels rgba
+  uv backward
+  name temporal_warp_prev2
+  xpos 1000
+  ypos 1620
+ }
+push $Nc3758f00
+ MergeExpression {
+  inputs 2
+  expr0 Ar
+  expr1 Ag
+  expr2 Ab
+  expr3 "exp(-4/(2*1.44)) * exp(-(Aa - Ba)*(Aa - Ba)/(2*parent.match_tolerance*parent.match_tolerance))"
+  name temporal_weight_prev2
+  xpos 1000
+  ypos 1660
+ }
+push $Nc3758f00
+ TimeOffset {
+  time_offset 2
+  time ""
+  name temporal_offset_next2
+  xpos 1600
+  ypos 1440
+ }
+push $Nc3758f00
+ TimeOffset {
+  time_offset 1
+  time ""
+  name temporal_offset_next1
+  xpos 1450
+  ypos 1440
+ }
+set Nc3789000 [stack 0]
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_warp_next2_a_copy
+  xpos 1600
+  ypos 1500
+ }
+ IDistort {
+  channels rgba
+  uv forward
+  name temporal_warp_next2_a
+  xpos 1600
+  ypos 1540
+ }
+push $Nc3758f00
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_warp_next2_copy
+  xpos 1600
+  ypos 1580
+ }
+ IDistort {
+  channels rgba
+  uv forward
+  name temporal_warp_next2
+  xpos 1600
+  ypos 1620
+ }
+push $Nc3758f00
+ MergeExpression {
+  inputs 2
+  expr0 Ar
+  expr1 Ag
+  expr2 Ab
+  expr3 "exp(-4/(2*1.44)) * exp(-(Aa - Ba)*(Aa - Ba)/(2*parent.match_tolerance*parent.match_tolerance))"
+  name temporal_weight_next2
+  xpos 1600
+  ypos 1660
+ }
+push $Nc3788800
+push $Nc3758f00
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_warp_prev1_copy
+  xpos 1150
+  ypos 1500
+ }
+ IDistort {
+  channels rgba
+  uv backward
+  name temporal_warp_prev1
+  xpos 1150
+  ypos 1540
+ }
+push $Nc3758f00
+ MergeExpression {
+  inputs 2
+  expr0 Ar
+  expr1 Ag
+  expr2 Ab
+  expr3 "exp(-1/(2*1.44)) * exp(-(Aa - Ba)*(Aa - Ba)/(2*parent.match_tolerance*parent.match_tolerance))"
+  name temporal_weight_prev1
+  xpos 1150
+  ypos 1660
+ }
+push $Nc3789000
+push $Nc3758f00
+ Copy {
+  inputs 2
+  channels rgba
+  name temporal_warp_next1_copy
+  xpos 1450
+  ypos 1500
+ }
+ IDistort {
+  channels rgba
+  uv forward
+  name temporal_warp_next1
+  xpos 1450
+  ypos 1540
+ }
+push $Nc3758f00
+ MergeExpression {
+  inputs 2
+  expr0 Ar
+  expr1 Ag
+  expr2 Ab
+  expr3 "exp(-1/(2*1.44)) * exp(-(Aa - Ba)*(Aa - Ba)/(2*parent.match_tolerance*parent.match_tolerance))"
+  name temporal_weight_next1
+  xpos 1450
+  ypos 1660
+ }
+push $Nc3758f00
+ Expression {
+  expr0 r
+  expr1 g
+  expr2 b
+  expr3 1
+  name temporal_self
+  xpos 1300
+  ypos 1500
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br + Aa*Ar"
+  expr1 "Bg + Aa*Ag"
+  expr2 "Bb + Aa*Ab"
+  expr3 "Ba + Aa"
+  name temporal_sum_next1
+  xpos 1300
+  ypos 1820
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br + Aa*Ar"
+  expr1 "Bg + Aa*Ag"
+  expr2 "Bb + Aa*Ab"
+  expr3 "Ba + Aa"
+  name temporal_sum_prev1
+  xpos 1300
+  ypos 1740
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br + Aa*Ar"
+  expr1 "Bg + Aa*Ag"
+  expr2 "Bb + Aa*Ab"
+  expr3 "Ba + Aa"
+  name temporal_sum_next2
+  xpos 1300
+  ypos 1860
+ }
+ MergeExpression {
+  inputs 2
+  expr0 "Br + Aa*Ar"
+  expr1 "Bg + Aa*Ag"
+  expr2 "Bb + Aa*Ab"
+  expr3 "Ba + Aa"
+  name temporal_sum_prev2
+  xpos 1300
+  ypos 1700
+ }
+ Expression {
+  expr0 "a > 0 ? r/a : r"
+  expr1 "a > 0 ? g/a : g"
+  expr2 "a > 0 ? b/a : b"
+  expr3 a
+  name temporal_mean
+  xpos 1300
+  ypos 1900
+ }
+push $Na121af00
+push $Nc340fe00
+ MergeExpression {
+  inputs 2
+  expr0 0
+  expr1 0
+  expr2 0
+  expr3 "(1 - Ba)*smoothstep(0.001, 0.01, Aa)"
+  name temporal_zone
+  xpos 1500
+  ypos 1900
+ }
+ MergeExpression {
+  inputs 2
+  expr0 Ar
+  expr1 Ag
+  expr2 Ab
+  expr3 Ba
+  name temporal_mean_zone
+  xpos 1300
+  ypos 1940
+ }
+push $Nc36d7700
+ MergeExpression {
+  inputs 2
+  expr0 "Br + Aa*(Ar - Br)"
+  expr1 "Bg + Aa*(Ag - Bg)"
+  expr2 "Bb + Aa*(Ab - Bb)"
+  expr3 Ba
+  name temporal_result
+  xpos 1300
+  ypos 1980
+ }
+push $Nc36d7700
+ Switch {
+  inputs 2
+  which {{parent.temporal}}
+  name temporal_switch
+  xpos 0
+  ypos 2020
+ }
+ Switch {
+  inputs 3
+  which {{parent.view}}
+  name view_switch
+  xpos 0
+  ypos 1460
+ }
+ Premult {
+  name premult
+  xpos 0
+  ypos 1500
+  disable {{"!parent.premultiply || parent.view == 1"}}
+ }
+ Crop {
+  box {{0} {0} {width} {height}}
+  name crop_output
+  xpos 0
+  ypos 1540
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 1600
+ }
+end_group
